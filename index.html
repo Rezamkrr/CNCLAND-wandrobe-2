@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNC LAND V65+</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#09111f">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+THREE.OrbitControls=function(object,domElement){var scope=this;this.object=object;this.domElement=domElement!==undefined?domElement:document;this.enabled=true;this.target=new THREE.Vector3;this.minDistance=0;this.maxDistance=Infinity;this.minZoom=0;this.maxZoom=Infinity;this.minPolarAngle=0;this.maxPolarAngle=Math.PI;this.enableDamping=false;this.dampingFactor=0.25;this.enableZoom=true;this.zoomSpeed=1.0;this.enableRotate=true;this.rotateSpeed=1.0;this.enablePan=true;this.keyPanSpeed=7.0;this.autoRotate=false;this.autoRotateSpeed=2.0;this.enableKeys=true;this.keys={LEFT:37,UP:38,RIGHT:39,BOTTOM:40};this.mouseButtons={ORBIT:THREE.MOUSE.LEFT,ZOOM:THREE.MOUSE.MIDDLE,PAN:THREE.MOUSE.RIGHT};var changeEvent={type:'change'};var startEvent={type:'start'};var endEvent={type:'end'};var STATE={NONE:-1,ROTATE:0,DOLLY:1,PAN:2,TOUCH_ROTATE:3,TOUCH_DOLLY:4,TOUCH_PAN:5};var state=STATE.NONE;var EPS=0.000001;var spherical=new THREE.Spherical;var sphericalDelta=new THREE.Spherical;var scale=1;var panOffset=new THREE.Vector3;var zoomChanged=false;var rotateStart=new THREE.Vector2;var rotateEnd=new THREE.Vector2;var rotateDelta=new THREE.Vector2;var panStart=new THREE.Vector2;var panEnd=new THREE.Vector2;var panDelta=new THREE.Vector2;var dollyStart=new THREE.Vector2;var dollyEnd=new THREE.Vector2;var dollyDelta=new THREE.Vector2;function getAutoRotationAngle(){return 2*Math.PI/60/60*scope.autoRotateSpeed}function getZoomScale(){return Math.pow(0.95,scope.zoomSpeed)}function rotateLeft(angle){sphericalDelta.theta-=angle}function rotateUp(angle){sphericalDelta.phi-=angle}var panLeft=function(){var v=new THREE.Vector3;return function(distance,objectMatrix){v.setFromMatrixColumn(objectMatrix,0);v.multiplyScalar(-distance);panOffset.add(v)}}();var panUp=function(){var v=new THREE.Vector3;return function(distance,objectMatrix){v.setFromMatrixColumn(objectMatrix,1);v.multiplyScalar(distance);panOffset.add(v)}}();var pan=function(){var offset=new THREE.Vector3;return function(deltaX,deltaY){var element=scope.domElement===document?scope.domElement.body:scope.domElement;if(scope.object instanceof THREE.PerspectiveCamera){var position=scope.object.position;offset.copy(position).sub(scope.target);var targetDistance=offset.length();targetDistance*=Math.tan(scope.object.fov/2*Math.PI/180);panLeft(2*deltaX*targetDistance/element.clientHeight,scope.object.matrix);panUp(2*deltaY*targetDistance/element.clientHeight,scope.object.matrix)}}}();function dollyIn(dollyScale){if(scope.object instanceof THREE.PerspectiveCamera){scale/=dollyScale}}function dollyOut(dollyScale){if(scope.object instanceof THREE.PerspectiveCamera){scale*=dollyScale}}function handleMouseDownRotate(event){rotateStart.set(event.clientX,event.clientY)}function handleMouseDownDolly(event){dollyStart.set(event.clientX,event.clientY)}function handleMouseDownPan(event){panStart.set(event.clientX,event.clientY)}function handleMouseMoveRotate(event){rotateEnd.set(event.clientX,event.clientY);rotateDelta.subVectors(rotateEnd,rotateStart);var element=scope.domElement===document?scope.domElement.body:scope.domElement;rotateLeft(-2*Math.PI*rotateDelta.x/element.clientWidth*scope.rotateSpeed);rotateUp(2*Math.PI*rotateDelta.y/element.clientHeight*scope.rotateSpeed);rotateStart.copy(rotateEnd);scope.update()}function handleMouseMoveDolly(event){dollyEnd.set(event.clientX,event.clientY);dollyDelta.subVectors(dollyEnd,dollyStart);if(dollyDelta.y>0){dollyIn(getZoomScale())}else if(dollyDelta.y<0){dollyOut(getZoomScale())}dollyStart.copy(dollyEnd);scope.update()}function handleMouseMovePan(event){panEnd.set(event.clientX,event.clientY);panDelta.subVectors(panEnd,panStart).multiplyScalar(scope.panSpeed);pan(panDelta.x,panDelta.y);panStart.copy(panEnd);scope.update()}function handleMouseWheel(event){if(event.deltaY<0){dollyOut(getZoomScale())}else if(event.deltaY>0){dollyIn(getZoomScale())}scope.update()}function onMouseDown(event){if(scope.enabled===false)return;event.preventDefault();if(event.button===scope.mouseButtons.ORBIT){if(scope.enableRotate===false)return;handleMouseDownRotate(event);state=STATE.ROTATE}else if(event.button===scope.mouseButtons.ZOOM){if(scope.enableZoom===false)return;handleMouseDownDolly(event);state=STATE.DOLLY}else if(event.button===scope.mouseButtons.PAN){if(scope.enablePan===false)return;handleMouseDownPan(event);state=STATE.PAN}if(state!==STATE.NONE){document.addEventListener('mousemove',onMouseMove,false);document.addEventListener('mouseup',onMouseUp,false);scope.dispatchEvent(startEvent)}}function onMouseMove(event){if(scope.enabled===false)return;event.preventDefault();if(state===STATE.ROTATE){if(scope.enableRotate===false)return;handleMouseMoveRotate(event)}else if(state===STATE.DOLLY){if(scope.enableZoom===false)return;handleMouseMoveDolly(event)}else if(state===STATE.PAN){if(scope.enablePan===false)return;handleMouseMovePan(event)}}function onMouseUp(event){if(scope.enabled===false)return;document.removeEventListener('mousemove',onMouseMove,false);document.removeEventListener('mouseup',onMouseUp,false);scope.dispatchEvent(endEvent);state=STATE.NONE}function onMouseWheel(event){if(scope.enabled===false||scope.enableZoom===false||(state!==STATE.NONE&&state!==STATE.ROTATE))return;event.preventDefault();event.stopPropagation();handleMouseWheel(event);scope.dispatchEvent(startEvent);scope.dispatchEvent(endEvent)}function onContextMenu(event){if(scope.enabled===false)return;event.preventDefault()}scope.domElement.addEventListener('contextmenu',onContextMenu,false);scope.domElement.addEventListener('mousedown',onMouseDown,false);scope.domElement.addEventListener('wheel',onMouseWheel,false);
+// ── Touch Support ──
+var touches={0:null,1:null};
+var touchStartDist=0,touchStartScale=1;
+var touchStartMid={x:0,y:0};
+function getTouchDist(t){var dx=t[0].clientX-t[1].clientX,dy=t[0].clientY-t[1].clientY;return Math.sqrt(dx*dx+dy*dy);}
+function onTouchStart(event){event.preventDefault();var t=event.touches;if(t.length===1){state=STATE.ROTATE;rotateStart.set(t[0].clientX,t[0].clientY);}else if(t.length===2){state=STATE.DOLLY;touchStartDist=getTouchDist(t);touchStartMid.x=(t[0].clientX+t[1].clientX)/2;touchStartMid.y=(t[0].clientY+t[1].clientY)/2;rotateStart.set(touchStartMid.x,touchStartMid.y);}}
+function onTouchMove(event){event.preventDefault();var t=event.touches;if(t.length===1&&state===STATE.ROTATE){rotateEnd.set(t[0].clientX,t[0].clientY);rotateDelta.subVectors(rotateEnd,rotateStart);var el=scope.domElement===document?scope.domElement.body:scope.domElement;rotateLeft(2*Math.PI*rotateDelta.x/el.clientWidth*scope.rotateSpeed);rotateUp(2*Math.PI*rotateDelta.y/el.clientHeight*scope.rotateSpeed);rotateStart.copy(rotateEnd);scope.update();}else if(t.length===2){var dist=getTouchDist(t);var delta=touchStartDist/dist;if(delta>1)dollyIn(delta);else dollyOut(1/delta);touchStartDist=dist;scope.update();}}
+function onTouchEnd(event){state=STATE.NONE;}
+scope.domElement.addEventListener('touchstart',onTouchStart,{passive:false});
+scope.domElement.addEventListener('touchmove',onTouchMove,{passive:false});
+scope.domElement.addEventListener('touchend',onTouchEnd,false);
+this.update=function(){var offset=new THREE.Vector3;var quat=new THREE.Quaternion().setFromUnitVectors(object.up,new THREE.Vector3(0,1,0));var quatInverse=quat.clone().invert();var lastPosition=new THREE.Vector3;var lastQuaternion=new THREE.Quaternion;return function update(){var position=scope.object.position;offset.copy(position).sub(scope.target);offset.applyQuaternion(quat);spherical.setFromVector3(offset);if(scope.autoRotate&&state===STATE.NONE){rotateLeft(getAutoRotationAngle())}spherical.theta+=sphericalDelta.theta;spherical.phi+=sphericalDelta.phi;spherical.phi=Math.max(scope.minPolarAngle,Math.min(scope.maxPolarAngle,spherical.phi));if(isFinite(scope.minAzimuthAngle)&&isFinite(scope.maxAzimuthAngle)){spherical.theta=Math.max(scope.minAzimuthAngle,Math.min(scope.maxAzimuthAngle,spherical.theta));}spherical.makeSafe();spherical.radius*=scale;spherical.radius=Math.max(scope.minDistance,Math.min(scope.maxDistance,spherical.radius));scope.target.add(panOffset);offset.setFromSpherical(spherical);offset.applyQuaternion(quatInverse);position.copy(scope.target).add(offset);scope.object.lookAt(scope.target);if(scope.enableDamping===true){sphericalDelta.theta*=1-scope.dampingFactor;sphericalDelta.phi*=1-scope.dampingFactor}else{sphericalDelta.set(0,0,0)}scale=1;panOffset.set(0,0,0);if(zoomChanged||lastPosition.distanceToSquared(scope.object.position)>EPS||8*(1-lastQuaternion.dot(scope.object.quaternion))>EPS){scope.dispatchEvent(changeEvent);lastPosition.copy(scope.object.position);lastQuaternion.copy(scope.object.quaternion);zoomChanged=false;return true}return false}}();this.dispose=function(){scope.domElement.removeEventListener('contextmenu',onContextMenu,false);scope.domElement.removeEventListener('mousedown',onMouseDown,false);scope.domElement.removeEventListener('wheel',onMouseWheel,false);document.removeEventListener('mousemove',onMouseMove,false);document.removeEventListener('mouseup',onMouseUp,false)};this.update()};THREE.OrbitControls.prototype=Object.create(THREE.EventDispatcher.prototype);THREE.OrbitControls.prototype.constructor=THREE.OrbitControls;
+/* ══ PWA SERVICE WORKER REGISTRATION ════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(registration => {
+        console.log('موتور Service Worker با موفقیت روشن شد! Scope:', registration.scope);
+      })
+      .catch(error => {
+        console.error('خطا در راه‌اندازی Service Worker:', error);
+      });
+  });
+}
+</script>
+<style>
+:root{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#10b981;--danger:#ef4444;--warning:#f59e0b;--dark:#1e293b;--darker:#0f172a;--light:#f8fafc;--border:#e2e8f0;--shadow:rgba(0,0,0,0.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#30343f;color:#1e293b;padding:8px;overflow:hidden;height:100vh}
+.container{display:grid;grid-template-columns:500px 1fr;gap:10px;height:calc(100vh - 16px);max-width:1920px;margin:0 auto}
+.sidebar{background:#ffbe0b;border-radius:0;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+
+/* ══════ موبایل ══════ */
+@media(max-width:800px){
+  html,body{height:auto;overflow:auto}
+  body{padding:0}
+  .container{display:flex;flex-direction:column;height:auto;min-height:100vh;gap:0}
+  .preview-area{
+    order:1;width:100%;height:56vw;min-height:220px;max-height:340px;
+    border-radius:0;padding:6px;
+    position:sticky;top:0;z-index:50;
+    background:#1a1a2e;
+    overflow:hidden
+  }
+  svg#svgMain{width:100%!important;height:100%!important;max-height:100%}
+  #canvas3D{position:absolute!important;top:0;left:0;width:100%!important;height:100%!important}
+  .sidebar{order:2;width:100%;padding:10px;overflow-y:visible;height:auto;border-radius:0}
+  .view-toggle{top:6px;right:6px;gap:4px}
+  .view-btn{padding:5px 9px;font-size:10px;border-radius:7px}
+  .preview-info{top:6px;left:4px;padding:5px 9px;font-size:10px}
+  .controls-info{bottom:6px;left:6px;font-size:9px;padding:5px 8px}
+  .header h1{font-size:15px}
+  .version-badge{padding:3px 8px;font-size:10px}
+  .tabs{grid-template-columns:repeat(4,1fr)}
+  .project-slots{grid-template-columns:repeat(10,1fr)}
+  details>summary{padding:8px 10px!important;font-size:11px!important}
+  input[type="number"],input[type="text"],select{font-size:14px;padding:8px 10px}
+  .btn-action{padding:12px;font-size:13px}
+  .btn-dxf{padding:14px;font-size:14px}
+}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-track{background:#f1f5f9;border-radius:1px}
+.sidebar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:1px}
+.header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:gray;padding:3px 10px;border-radius:5px;box-shadow:0 4px 20px rgba(59,130,246,0.3)}
+.header h1{font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.version-badge{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+.card{background:;border:1px solid var(--border);border-radius:12px;padding:14px;transition:all .3s ease;animation:fadeIn .5s ease}
+.card:hover{box-shadow:0 4px 12px var(--shadow)}
+.card-header{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:var(--light);padding:5px;border-radius:10px}
+.tab{padding:9px;font-size:11px;border:none;cursor:pointer;background:transparent;font-weight:600;color:#64748b;border-radius:6px;transition:all .2s}
+.tab:hover{background:rgba(59,130,246,.1);color:var(--primary)}
+.tab.active{background:white;color:var(--primary);box-shadow:0 2px 8px var(--shadow)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.control-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-field{display:flex;flex-direction:column}
+label{font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+input[type="number"],input[type="text"],select{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;transition:all .3s;background:white}
+input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+input[type="checkbox"],input[type="radio"]{width:16px;height:16px;cursor:pointer;margin-left:6px}
+input[type="color"]{width:100%;height:36px;padding:2px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:white}
+.btn-action{width:100%;padding:11px;background:var(--secondary);color:white;border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;transition:all .3s;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+.btn-action:hover{background:#059669;transform:translateY(-2px)}
+.btn-dxf{background:linear-gradient(135deg,var(--danger) 0%,#dc2626 100%);font-size:14px;margin-top:auto;padding:14px;box-shadow:0 8px 24px rgba(239,68,68,.4)}
+.btn-dxf:hover{transform:translateY(-2px)}
+.btn-secondary{background:var(--primary);box-shadow:0 4px 12px rgba(59,130,246,.3)}
+.btn-secondary:hover{background:var(--primary-dark)}
+.btn-sm{padding:4px 9px;font-size:11px;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:all .2s}
+.preview-area{background:30343f;border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:15px;position:relative;box-shadow:0 px px rgba(0,0,0,0.3);min-height:500px}
+svg{max-width:100%;max-height:100%;height:auto;width:auto;background:hidden;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.preview-info{position:absolute;top:20px;left:2px;background:rgba(255,255,255,.95);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:600;color:var(--dark);box-shadow:0 1px 1px rgba(0,0,0,.1);backdrop-filter:blur(10px);z-index:10}
+.view-toggle{position:absolute;top:70px;right:20px;z-index:100;display:flex;gap:8px}
+.view-btn{padding:9px 14px;background:rgba(255,255,255,.95);border:2px solid var(--primary);border-radius:10px;cursor:pointer;font-size:11px;font-weight:700;color:var(--primary);transition:all .3s;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.view-btn:hover,.view-btn.active{background:var(--primary);color:white}
+#canvas3D{width:100%;height:calc(100vh - 80px);display:none;border-radius:12px;position:absolute;top:0;left:0}
+#canvas3D.active{display:block}
+.controls-info{position:absolute;bottom:20px;left:20px;background:rgba(255,255,255,.95);padding:10px 14px;border-radius:12px;font-size:11px;color:var(--dark);box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:10;line-height:1.6}
+.hidden-input{display:none}
+.layer-item{display:grid;grid-template-columns:1fr 1fr 30px;gap:6px;margin-bottom:6px;background:var(--light);padding:7px;border-radius:8px;border:1px solid var(--border)}
+.btn-del{background:#fee2e2;color:#ef4444;border:none;border-radius:6px;cursor:pointer;font-size:16px;font-weight:700;transition:all .2s}
+.btn-del:hover{background:#ef4444;color:white}
+.mode-selector{background:#f0f9ff;padding:10px;border-radius:8px;margin-bottom:10px;border:1px solid #bae6fd}
+.mode-selector-title{font-weight:700;font-size:12px;margin-bottom:8px;color:#0369a1}
+.radio-option{display:flex;align-items:center;cursor:pointer;margin-bottom:6px;font-size:12px}
+.radio-option:last-child{margin-bottom:0}
+.radio-option input{margin-left:6px}
+.groove-name-section{background:#fffbeb;padding:10px;border-radius:8px;margin-top:10px;border:1px solid #fbbf24}
+.groove-name-section label{color:#92400e}
+.drawer-auto-section{background:#fef3c7;padding:10px;border-radius:8px;margin:8px 0;border:1px solid #fbbf24}
+.radius-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#fef3c7;padding:10px;border-radius:8px}
+.margin-grid-four{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#e0f2fe;padding:10px;border-radius:8px}
+.project-name-input{width:100%;padding:8px 10px;border:2px solid rgba(255,255,255,.3);border-radius:8px;margin-bottom:4px;font-size:13px;background:rgba(255,255,255,.95)}
+.project-slots{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-bottom:8px}
+.project-slot{aspect-ratio:1;background:#f1f5f9;border:2px solid transparent;border-radius:7px;cursor:pointer;text-align:center;font-size:9px;color:#64748b;transition:all .2s;position:relative;display:flex;align-items:center;justify-content:center;font-weight:600}
+.project-slot:hover{background:#e0e7ff;color:#4338ca;transform:scale(1.05)}
+.project-slot.active{background:var(--primary);color:white;border-color:#fbbf24;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.project-slot.empty{opacity:.4;font-style:italic}
+.delete-btn{position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;border:2px solid white;border-radius:50%;width:15px;height:15px;font-size:10px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center}
+.delete-btn:hover{background:#dc2626;transform:scale(1.1)}
+.hybrid-row{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px;margin-bottom:6px}
+.hybrid-row-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.hybrid-select{flex:1;padding:6px;font-size:11px;border:1px solid #e2e8f0;border-radius:6px}
+.bay-delete-btn{background:#fee2e2;color:#ef4444;border:1px solid #fca5a5;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-weight:700;white-space:nowrap}
+.bay-delete-btn:hover{background:#ef4444;color:white}
+.shelf-control{display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b}
+.shelf-control input{width:55px;padding:4px 7px;font-size:12px;border:1px solid #e2e8f0;border-radius:6px}
+.material-panel{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);border:none;color:white}
+.material-panel .card-header{color:white;border-bottom-color:rgba(255,255,255,.2)}
+.mat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mat-item{display:flex;flex-direction:column;gap:4px}
+.mat-item label{color:rgba(255,255,255,.8);font-size:10px}
+.mat-item input[type="color"]{height:32px;border-color:rgba(255,255,255,.2)}
+.mat-item input[type="range"]{width:100%;margin:2px 0}
+.layer-lib-card{background:linear-gradient(135deg,#0f766e 0%,#0d9488 100%);border:none;color:white}
+.layer-lib-card .card-header{color:white;border-bottom-color:rgba(255,255,255,.25)}
+.layer-lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.layer-lib-input{background:rgba(255,255,255,.9);border:none;border-radius:6px;padding:6px 9px;font-size:12px;width:100%}
+.layer-lib-label{color:rgba(255,255,255,.85);font-size:10px;font-weight:600;margin-bottom:3px;display:block}
+.preset-list{display:flex;flex-direction:column;gap:4px;margin-top:8px;max-height:130px;overflow-y:auto}
+.preset-item{background:rgba(255,255,255,.15);border-radius:6px;padding:6px 8px;display:flex;align-items:center;gap:5px;font-size:11px}
+.preset-item span{flex:1}
+.file-status{font-size:10px;color:#64748b;padding:6px;background:var(--light);border-radius:6px;text-align:center;font-weight:600}
+.file-status.loaded{background:#d1fae5;color:#065f46}
+.file-upload-btn{width:100%;padding:8px;background:var(--primary);color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;transition:all .2s;text-align:center;margin-bottom:6px}
+.file-upload-btn:hover{background:var(--primary-dark)}
+.clear-file-btn{width:100%;padding:5px;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;cursor:pointer;font-size:10px;font-weight:600;margin-top:4px}
+.clear-file-btn:hover{background:#fecaca}
+.copy-option-item{display:flex;align-items:center;margin-bottom:6px;font-size:12px;cursor:pointer}
+.copy-option-item input{margin-left:7px}
+.copy-btn{padding:10px;background:rgba(255,255,255,.95);color:#059669;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;width:100%}
+.copy-btn:hover{background:white;transform:translateY(-2px)}
+
+/* ══════════════════════════════════════════
+   Bit Library Styles
+══════════════════════════════════════════ */
+.bit-lib-card{background:linear-gradient(135deg,#12082a 0%,#1e0f4a 50%,#2d1060 100%);border:1px solid rgba(139,92,246,.35)!important;color:white}
+.bit-filter-btn{padding:3px 9px;font-size:10px;border:1px solid rgba(255,255,255,.25);border-radius:12px;cursor:pointer;font-weight:600;color:rgba(255,255,255,.65);background:rgba(255,255,255,.07);transition:all .2s;flex-shrink:0;font-family:'Segoe UI',sans-serif}
+.bit-filter-btn:hover{background:rgba(255,255,255,.18);color:white}
+.bit-filter-btn.active{background:var(--bfc,rgba(255,255,255,.9));color:#1a0a2e;border-color:transparent}
+.bit-row{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.bit-row:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.15)}
+.bit-row:active{background:rgba(255,255,255,.22)}
+.bit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bit-name{flex:1;font-size:11px;font-weight:500;color:rgba(255,255,255,.9);font-family:'Courier New',monospace;direction:ltr;text-align:right}
+.bit-tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:5px;flex-shrink:0;opacity:.85}
+.bit-sep{height:1px;background:rgba(255,255,255,.1);margin:2px 0}
+#bitListContainer::-webkit-scrollbar{width:4px}
+#bitListContainer::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}
+#bitListContainer::-webkit-scrollbar-thumb{background:rgba(139,92,246,.5);border-radius:2px}
+#bitSearch{outline:none}
+#bitSearch:focus{border-color:rgba(139,92,246,.7)!important;box-shadow:0 0 0 2px rgba(139,92,246,.2)!important}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="sidebar">
+    <div class="header">
+      <h1><span>🔧 CNC LAND</span><span class="version-badge">V65+</span></h1>
+    </div>
+    <div class="card" style="padding:8px 12px;">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+        <span style="font-size:12px;font-weight:700;color:#374151;flex:1;">📁 پروژه</span>
+        <button onclick="saveCurrentProject()" class="btn-sm" style="background:#e0f2fe;color:#0369a1;" title="ذخیره">💾</button>
+        <button onclick="newProject()" class="btn-sm" style="background:#dcfce7;color:#15803d;" title="جدید">➕</button>
+        <button onclick="duplicateProject()" class="btn-sm" style="background:#f3e8ff;color:#7c3aed;" title="کپی">📋</button>
+        <button onclick="exportAllProjects()" class="btn-sm" style="background:#fef9c3;color:#a16207;" title="دانلود">📦</button>
+        <button onclick="document.getElementById('importFileInput').click()" class="btn-sm" style="background:#fee2e2;color:#b91c1c;" title="بازیابی">📥</button>
+      </div>
+      <input type="text" id="projectName" class="project-name-input" placeholder="نام پروژه...">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;margin-top:6px;">
+        <span style="font-size:11px;font-weight:700;color:#6b7280;">📂 مجموعه:</span>
+        <select id="projectSetSelect" onchange="switchProjectSet(+this.value)" style="flex:1;padding:3px 6px;font-size:11px;border:1px solid #e2e8f0;border-radius:6px;"></select>
+        <button onclick="addProjectSet()" class="btn-sm" style="background:#dcfce7;color:#15803d;" title="مجموعه جدید">📂+</button>
+        <button onclick="renameProjectSet()" class="btn-sm" style="background:#e0f2fe;color:#0369a1;" title="تغییر نام">✏️</button>
+        <button onclick="deleteProjectSet()" class="btn-sm" style="background:#fee2e2;color:#b91c1c;" title="حذف مجموعه">🗑️</button>
+      </div>
+      <div class="project-slots" id="projectSlots"></div>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" onchange="importAllProjects(event)" class="hidden-input">
+
+    <details class="card bit-lib-card" style="padding:0;">
+      <summary style="padding:9px 14px;cursor:pointer;font-size:12px;font-weight:700;color:white;list-style:none;display:flex;align-items:center;gap:6px;">
+        <span>🔩</span>
+        <span>کتابخانه ابزار (Bit Library)</span>
+        <span id="bitCountBadge" style="font-size:10px;background:rgba(139,92,246,.35);padding:2px 8px;border-radius:10px;margin-right:auto;color:rgba(255,255,255,.8);">74 لایه</span>
+      </summary>
+      <div style="padding:0 10px 12px;">
+        <div style="padding-top:8px;margin-bottom:7px;">
+          <input type="text" id="bitSearch" placeholder="🔍 جستجو در لایه‌ها..."
+            oninput="renderBitList()"
+            style="width:100%;padding:7px 10px;border:1px solid rgba(139,92,246,.4);border-radius:8px;font-size:12px;background:rgba(255,255,255,.07);color:white;">
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:7px;flex-wrap:wrap;" id="bitFilterTabs"></div>
+        <div id="bitListContainer" style="max-height:210px;overflow-y:auto;display:flex;flex-direction:column;gap:1px;"></div>
+        <div style="margin-top:6px;font-size:9px;color:rgba(255,255,255,.3);text-align:center;">کلیک = اعمال در فیلد برش اصلی &nbsp;|&nbsp; دابل‌کلیک = کپی متن</div>
+      </div>
+    </details>
+
+    <details class="card material-panel" style="padding:0;">
+      <summary style="padding:9px 14px;cursor:pointer;font-size:12px;font-weight:700;color:white;list-style:none;display:flex;align-items:center;gap:6px;"><span>🎨</span><span>متریال‌های 3D</span></summary>
+      <div style="padding:0 14px 12px;">
+        <div class="mat-grid" style="padding-top:10px;">
+          <div class="mat-item"><label>🪵 بدنه</label><input type="color" id="mat_body" value="#c8974a" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>🚪 پنل/درب</label><input type="color" id="mat_panel" value="#d4a96a" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>🔲 لبه/قاب</label><input type="color" id="mat_edge" value="#8B5E3C" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>🔩 دستگیره</label><input type="color" id="mat_handle" value="#c0c8d4" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>📚 شلف</label><input type="color" id="mat_shelf" value="#d4a96a" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>🌑 پس‌زمینه 3D</label><input type="color" id="mat_bg" value="#14121a" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>👑 تاج</label><input type="color" id="mat_crown" value="#b87333" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>🏛️ پاسنگ</label><input type="color" id="mat_baseboard" value="#b87333" oninput="updateMaterials()"></div>
+          <div class="mat-item"><label>🪵 کف اتاق</label><input type="color" id="mat_floor" value="#c8a96e" oninput="if(scene){buildRoom();render3D();}"></div>
+          <div class="mat-item"><label>🧱 دیوار</label><input type="color" id="mat_wall" value="#e8dfc8" oninput="if(scene){buildRoom();render3D();}"></div>
+          <div class="mat-item"><label>🪟 سقف</label><input type="color" id="mat_ceil" value="#f5f0e8" oninput="if(scene){buildRoom();render3D();}"></div>
+        </div>
+        <div style="margin-top:10px;padding:8px;background:rgba(255,255,255,.1);border-radius:8px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+            <label style="color:rgba(255,255,255,.9);font-size:11px;font-weight:700;flex:1;">🔪 حک‌های 3D</label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+              <input type="checkbox" id="engrave_enabled" checked onchange="if(scene)render3D()" style="width:14px;height:14px;">
+              <span style="color:rgba(255,255,255,.8);font-size:10px;">فعال</span>
+            </label>
+          </div>
+          <div class="mat-grid">
+            <div class="mat-item"><label>🔲 رنگ قاب‌ها</label><input type="color" id="mat_engrave_frame" value="#2a1508" oninput="if(scene)render3D()"></div>
+            <div class="mat-item"><label>〰️ رنگ شیارها</label><input type="color" id="mat_engrave_groove" value="#150a04" oninput="if(scene)render3D()"></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <label class="mat-item" style="color:rgba(255,255,255,.8);font-size:10px;margin-bottom:4px;display:block;">✨ زبری بدنه (Roughness)</label>
+          <input type="range" id="mat_roughness" min="0" max="100" value="65" oninput="updateMaterials()" style="width:100%;margin-bottom:6px;">
+          <label class="mat-item" style="color:rgba(255,255,255,.8);font-size:10px;margin-bottom:4px;display:block;">💎 فلزی‌بودن دستگیره (Metalness)</label>
+          <input type="range" id="mat_metalness" min="0" max="100" value="92" oninput="updateMaterials()">
+        </div>
+        <button onclick="resetMaterials()" style="width:100%;margin-top:10px;padding:7px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;">↺ بازنشانی متریال</button>
+      </div>
+    </details>
+    <details class="card layer-lib-card" style="padding:0;">
+      <summary style="padding:9px 14px;cursor:pointer;font-size:12px;font-weight:700;color:white;list-style:none;display:flex;align-items:center;gap:6px;"><span>🏷️</span><span>کتابخانه نام لایه‌ها</span></summary>
+      <div style="padding:0 14px 12px;">
+        <div style="padding-top:10px;margin-bottom:8px;font-size:10px;color:rgba(255,255,255,.7);line-height:1.4;">نام لایه‌های برش در فایل DXF:</div>
+        <div class="layer-lib-grid">
+          <div><span class="layer-lib-label">✂️ برش اصلی</span><input type="text" id="layerName_main" value="cut6mm" class="layer-lib-input saveable"></div>
+          <div><span class="layer-lib-label">📦 برش کشوی دهنه</span><input type="text" id="layerName_slotCut" value="SLOT_DRAWER_cut" class="layer-lib-input saveable"></div>
+          <div><span class="layer-lib-label">👑 تاج</span><input type="text" id="layerName_crown" value="CROWN" class="layer-lib-input saveable"></div>
+          <div><span class="layer-lib-label">🏛️ پاسنگ</span><input type="text" id="layerName_baseboard" value="BASEBOARD" class="layer-lib-input saveable"></div>
+          <div><span class="layer-lib-label">🚪 برش درب کشو</span><input type="text" id="layerName_bayCut" value="DRAW_IN_cut" class="layer-lib-input saveable"></div>
+          <div><span class="layer-lib-label">📚 شلف</span><input type="text" id="layerName_shelf" value="SHELF" class="layer-lib-input saveable"></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px;">
+          <input type="text" id="layerPresetName" placeholder="نام پریست..." class="layer-lib-input" style="flex:1;">
+          <button onclick="saveLayerNamePreset()" style="padding:5px 10px;background:rgba(255,255,255,.9);color:#0f766e;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;">+ ذخیره</button>
+        </div>
+        <div id="layerNamePresetList" class="preset-list"></div>
+      </div>
+    </details>
+    <details class="card" style="padding:0;">
+      <summary style="padding:9px 14px;cursor:pointer;font-size:12px;font-weight:600;color:#64748b;list-style:none;display:flex;align-items:center;gap:6px;"><span>⚙️</span><span>تنظیمات بیشتر</span></summary>
+      <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;padding-top:10px;">
+          <span style="font-size:11px;font-weight:600;color:#64748b;white-space:nowrap;">🚀 مسیر ابزار</span>
+          <select id="GPattern" class="saveable" onchange="draw()" style="flex:1;font-size:11px;padding:4px;">
+            <option value="std">استاندارد</option>
+            <option value="alt">یکی در میان</option>
+            <option value="zig">زیگزاگ</option>
+          </select>
+        </div>
+        <details style="border:1px solid #e2e8f0;border-radius:8px;padding:0;">
+          <summary style="padding:7px 10px;cursor:pointer;font-size:11px;font-weight:600;color:#64748b;list-style:none;">👑 تاج و پاسنگ</summary>
+          <div style="padding:8px 10px 10px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <label style="font-size:11px;color:#64748b;white-space:nowrap;flex:1;">👑 تاج (mm)</label>
+              <input type="number" id="crownThickness" value="0" min="0" max="500" class="saveable" style="width:60px;font-size:12px;padding:3px 6px;border:1px solid #e2e8f0;border-radius:6px;" oninput="draw()">
+              <button class="file-upload-btn" style="padding:3px 7px;font-size:10px;width:auto;margin:0;" onclick="document.getElementById('crownFileInput').click()">📁</button>
+            </div>
+            <input type="file" id="crownFileInput" accept=".svg,.dxf" onchange="importCrown(event)" class="hidden-input">
+            <div id="crownStatus" class="file-status">فایلی انتخاب نشده</div>
+            <button id="clearCrownBtn" class="clear-file-btn" onclick="clearCrown()" style="display:none;">❌ حذف</button>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+              <label style="font-size:11px;color:#64748b;white-space:nowrap;flex:1;">🏛️ پاسنگ (mm)</label>
+              <input type="number" id="baseboardThickness" value="0" min="0" max="500" class="saveable" style="width:60px;font-size:12px;padding:3px 6px;border:1px solid #e2e8f0;border-radius:6px;" oninput="draw()">
+              <button class="file-upload-btn" style="padding:3px 7px;font-size:10px;width:auto;margin:0;" onclick="document.getElementById('baseboardFileInput').click()">📁</button>
+            </div>
+            <input type="file" id="baseboardFileInput" accept=".svg,.dxf" onchange="importBaseboard(event)" class="hidden-input">
+            <div id="baseboardStatus" class="file-status">فایلی انتخاب نشده</div>
+            <button id="clearBaseboardBtn" class="clear-file-btn" onclick="clearBaseboard()" style="display:none;">❌ حذف</button>
+          </div>
+        </details>
+        <details style="border:1px solid #e2e8f0;border-radius:8px;padding:0;">
+          <summary style="padding:7px 10px;cursor:pointer;font-size:11px;font-weight:600;color:#64748b;list-style:none;">🗂️ کتابخانه لایه‌های آفست</summary>
+          <div style="padding:8px 10px 10px;" id="layerPresetsCard">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <input type="text" id="newPresetName" placeholder="نام ست..." style="flex:1;font-size:11px;padding:4px 7px;border:1px solid #e2e8f0;border-radius:6px;">
+              <button onclick="saveLayerPreset()" style="font-size:11px;padding:4px 8px;background:#6366f1;color:#fff;border:none;border-radius:6px;cursor:pointer;white-space:nowrap;">+ ذخیره</button>
+            </div>
+            <div id="layerPresetsList" style="display:flex;flex-direction:column;gap:4px;max-height:140px;overflow-y:auto;"></div>
+          </div>
+        </details>
+        <details style="border:1px solid #e2e8f0;border-radius:8px;padding:0;">
+          <summary style="padding:7px 10px;cursor:pointer;font-size:11px;font-weight:600;color:#64748b;list-style:none;">📋 کپی تنظیمات به همه</summary>
+          <div style="padding:8px 10px 10px;">
+            <div style="margin-bottom:8px;">
+              <label class="copy-option-item"><input type="checkbox" id="copyMargins" checked><span>حاشیه‌ها</span></label>
+              <label class="copy-option-item"><input type="checkbox" id="copyRadius" checked><span>شعاع</span></label>
+              <label class="copy-option-item"><input type="checkbox" id="copyLayers" checked><span>آفست</span></label>
+              <label class="copy-option-item"><input type="checkbox" id="copyGrooves" checked><span>شیارها</span></label>
+              <label class="copy-option-item"><input type="checkbox" id="copyGrooveNames" checked><span>نام‌ها</span></label>
+            </div>
+            <button class="copy-btn" onclick="copySettingsToAll()">📋 کپی به همه</button>
+          </div>
+        </details>
+      </div>
+    </details>
+    <div class="tabs">
+      <button class="tab active" onclick="setTab('main',this)">🏠 اصلی</button>
+      <button class="tab" onclick="setTab('col',this)">📐 ستون</button>
+      <button class="tab" onclick="setTab('door',this)">🚪 درب</button>
+      <button class="tab" onclick="setTab('draw',this)">📦 کشو</button>
+    </div>
+    <div id="tab-main" class="tab-content active card">
+      <div class="card-header"><span>📏</span><span>ابعاد اصلی</span></div>
+      <div class="control-group">
+        <div class="form-field"><label>عرض کل (mm)</label><input id="W" type="number" value="1600" class="saveable"></div>
+        <div class="form-field"><label>ارتفاع کل (mm)</label><input id="H" type="number" value="2400" class="saveable"></div>
+      </div>
+      <div class="form-field"><label>فاصله بادخور (Gap)</label><input id="G" type="number" value="3" class="saveable"></div>
+    </div>
+    <div id="tab-col" class="tab-content card">
+      <div class="card-header"><span>📐</span><span>تنظیمات ستون</span></div>
+      <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;"><input type="checkbox" id="hasCol" class="saveable" checked><span style="font-size:13px;">فعال‌سازی ستون‌های کناری</span></label>
+      <div class="control-group">
+        <div class="form-field"><label>عرض ستون</label><input id="Cw" type="number" value="80" class="saveable"></div>
+        <div class="form-field"><label>گام شیار</label><input id="Cstep" type="number" value="20" class="saveable"></div>
+      </div>
+      <div class="control-group">
+        <div class="form-field"><label>زاویه (°)</label><input id="Cang" type="number" value="90" class="saveable"></div>
+        <div class="form-field"><label>حالت شیار</label>
+          <select id="Cmode" class="saveable"><option value="H">تک جهت</option><option value="Both">شبکه دوجهته</option></select>
+        </div>
+      </div>
+      <div class="groove-name-section"><label>🏷️ نام لایه شیارها</label><input type="text" id="grooveName_col" value="GROOVES_COL" class="saveable"></div>
+    </div>
+    <div id="tab-door" class="tab-content card">
+      <div class="card-header"><span>🚪</span><span>تنظیمات درب</span></div>
+      <div class="control-group">
+        <div class="form-field"><label>تعداد دهنه</label><input id="Dcount" type="number" value="3" class="saveable" oninput="syncDcountFromInput()"></div>
+      </div>
+      <div id="hybridContainer"></div>
+      <div id="slotDrawerSettings" style="display:none;">
+        <div class="drawer-auto-section" style="margin-top:12px;">
+          <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:8px;">⚙️ تنظیمات کشوهای زیر دهنه</div>
+          <div class="mode-selector" style="background:#fef3c7;border-color:#fbbf24;margin-bottom:10px;">
+            <div class="mode-selector-title" style="color:#ca8a04;">📦 حالت کشوهای زیر دهنه</div>
+            <label class="radio-option"><input type="radio" name="slotDrawerMode" value="continuous" checked onchange="draw()"><span>سرتاسری</span></label>
+            <label class="radio-option"><input type="radio" name="slotDrawerMode" value="separate" onchange="draw()"><span>جداگانه</span></label>
+          </div>
+          <div class="control-group">
+            <div class="form-field"><label>ارتفاع کشوهای زیر دهنه</label><input id="SlotDrawerH" type="number" value="150" class="saveable" oninput="draw()"></div>
+            <div class="form-field"><label>تعداد کشوی هر دهنه</label><input id="SlotDrawerCount" type="number" value="2" min="1" max="5" class="saveable" oninput="draw()"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-selector">
+        <div class="mode-selector-title">📐 حالت حاشیه قاب</div>
+        <label class="radio-option"><input type="radio" name="doorMarginMode" value="unified" checked onchange="toggleDoorMarginMode()"><span>یکپارچه</span></label>
+        <label class="radio-option"><input type="radio" name="doorMarginMode" value="separate" onchange="toggleDoorMarginMode()"><span>جداگانه</span></label>
+        <label class="radio-option"><input type="radio" name="doorMarginMode" value="fourside" onchange="toggleDoorMarginMode()"><span>چهار طرفه</span></label>
+      </div>
+      <div id="doorMarginUnified"><div class="form-field"><label>حاشیه قاب</label><input id="Pmargin" type="number" value="50" class="saveable"></div></div>
+      <div id="doorMarginSeparate" style="display:none;">
+        <div class="control-group">
+          <div class="form-field"><label>حاشیه عمودی</label><input id="PmarginV" type="number" value="50" class="saveable"></div>
+          <div class="form-field"><label>حاشیه افقی</label><input id="PmarginH" type="number" value="50" class="saveable"></div>
+        </div>
+      </div>
+      <div id="doorMarginFourSide" class="margin-grid-four" style="display:none;">
+        <div class="form-field"><label>⬆️ بالا</label><input id="PmarginTop" type="number" value="50" class="saveable"></div>
+        <div class="form-field"><label>⬇️ پایین</label><input id="PmarginBottom" type="number" value="50" class="saveable"></div>
+        <div class="form-field"><label>⬅️ چپ</label><input id="PmarginLeft" type="number" value="50" class="saveable"></div>
+        <div class="form-field"><label>➡️ راست</label><input id="PmarginRight" type="number" value="50" class="saveable"></div>
+      </div>
+      <div class="control-group" style="margin-top:8px;">
+        <div class="form-field"><label>ردیف قاب</label><input id="Prows" type="number" value="2" class="saveable"></div>
+        <div class="form-field"><label>ستون قاب</label><input id="Pcols" type="number" value="1" class="saveable"></div>
+      </div>
+      <div class="mode-selector" style="background:#fef3c7;border-color:#fde047;">
+        <div class="mode-selector-title" style="color:#ca8a04;">🔵 شعاع گوشه‌ها</div>
+        <label class="radio-option"><input type="radio" name="doorRadiusMode" value="unified" checked onchange="toggleDoorRadiusMode()"><span>یکپارچه</span></label>
+        <label class="radio-option"><input type="radio" name="doorRadiusMode" value="topbottom" onchange="toggleDoorRadiusMode()"><span>بالا/پایین</span></label>
+        <label class="radio-option"><input type="radio" name="doorRadiusMode" value="corners" onchange="toggleDoorRadiusMode()"><span>هر 4 گوشه</span></label>
+      </div>
+      <div id="doorRadiusUnified"><div class="form-field"><label>شعاع</label><input id="RDoor" type="number" value="40" class="saveable"></div></div>
+      <div id="doorRadiusTopBottom" style="display:none;">
+        <div class="control-group">
+          <div class="form-field"><label>شعاع بالا</label><input id="RtDoor" type="number" value="40" class="saveable"></div>
+          <div class="form-field"><label>شعاع پایین</label><input id="RbDoor" type="number" value="40" class="saveable"></div>
+        </div>
+      </div>
+      <div id="doorRadiusCorners" class="radius-grid" style="display:none;">
+        <div class="form-field"><label>↖ بالا-چپ</label><input id="RDoorTL" type="number" value="40" class="saveable"></div>
+        <div class="form-field"><label>↗ بالا-راست</label><input id="RDoorTR" type="number" value="40" class="saveable"></div>
+        <div class="form-field"><label>↙ پایین-چپ</label><input id="RDoorBL" type="number" value="40" class="saveable"></div>
+        <div class="form-field"><label>↘ پایین-راست</label><input id="RDoorBR" type="number" value="40" class="saveable"></div>
+      </div>
+      <label style="margin:10px 0 6px;display:block;">لایه‌های آفست</label>
+      <div id="doorLayersDiv"></div>
+      <button class="btn-action btn-secondary" style="padding:9px;font-size:12px;margin-top:6px;" onclick="addLayer('door')">+ افزودن لایه</button>
+      <div class="control-group" style="margin-top:10px;">
+        <div class="form-field"><label>گام شیار</label><input id="dS" type="number" value="50" class="saveable"></div>
+        <div class="form-field"><label>زاویه (°)</label><input id="dAngle" type="number" value="0" class="saveable"></div>
+      </div>
+      <div class="form-field"><label>حالت شیار</label>
+        <select id="Dmode" class="saveable"><option value="Both">شبکه دوجهته</option><option value="H">تک جهت</option></select>
+      </div>
+      <div class="groove-name-section"><label>🏷️ نام لایه شیارها</label><input type="text" id="grooveName_door" value="GROOVES_DOOR" class="saveable"></div>
+    </div>
+    <div id="tab-draw" class="tab-content card">
+      <div class="card-header"><span>📦</span><span>تنظیمات کشو</span></div>
+      <div class="drawer-auto-section">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;">
+          <input type="checkbox" id="autoDrawer" class="saveable" onchange="toggleAutoDrawer()">
+          <span>⚙️ ارتفاع ثابت برای هر کشو</span>
+        </label>
+      </div>
+      <div class="control-group">
+        <div class="form-field"><label>تعداد کشو</label><input id="DrCount" type="number" value="2" class="saveable"></div>
+        <div class="form-field" id="drHTotalField"><label>ارتفاع کل باکس</label><input id="DrH" type="number" value="450" class="saveable"></div>
+        <div class="form-field" id="drHEachField" style="display:none;"><label>ارتفاع هر کشو</label><input id="DrHEach" type="number" value="200" class="saveable"></div>
+      </div>
+      <div id="manualDrawerHeight">
+        <div class="form-field"><label>ارتفاع کشو آخر</label><input id="LastDrH" type="number" value="0" class="saveable"></div>
+      </div>
+      <div class="mode-selector">
+        <div class="mode-selector-title">📐 حالت حاشیه کشو</div>
+        <label class="radio-option"><input type="radio" name="drawerMarginMode" value="unified" checked onchange="toggleDrawerMarginMode()"><span>یکپارچه</span></label>
+        <label class="radio-option"><input type="radio" name="drawerMarginMode" value="separate" onchange="toggleDrawerMarginMode()"><span>جداگانه</span></label>
+        <label class="radio-option"><input type="radio" name="drawerMarginMode" value="fourside" onchange="toggleDrawerMarginMode()"><span>چهار طرفه</span></label>
+      </div>
+      <div id="drawerMarginUnified"><div class="form-field"><label>حاشیه کشو</label><input id="DrMargin" type="number" value="20" class="saveable"></div></div>
+      <div id="drawerMarginSeparate" style="display:none;">
+        <div class="control-group">
+          <div class="form-field"><label>حاشیه عمودی</label><input id="DrMarginV" type="number" value="20" class="saveable"></div>
+          <div class="form-field"><label>حاشیه افقی</label><input id="DrMarginH" type="number" value="20" class="saveable"></div>
+        </div>
+      </div>
+      <div id="drawerMarginFourSide" class="margin-grid-four" style="display:none;">
+        <div class="form-field"><label>⬆️ بالا</label><input id="DrMarginTop" type="number" value="20" class="saveable"></div>
+        <div class="form-field"><label>⬇️ پایین</label><input id="DrMarginBottom" type="number" value="20" class="saveable"></div>
+        <div class="form-field"><label>⬅️ چپ</label><input id="DrMarginLeft" type="number" value="20" class="saveable"></div>
+        <div class="form-field"><label>➡️ راست</label><input id="DrMarginRight" type="number" value="20" class="saveable"></div>
+      </div>
+      <div class="control-group" style="margin-top:6px;">
+        <div class="form-field"><label>ردیف قاب</label><input id="DrRows" type="number" value="1" class="saveable"></div>
+        <div class="form-field"><label>ستون قاب</label><input id="DrCols" type="number" value="2" class="saveable"></div>
+      </div>
+      <div class="mode-selector" style="background:#fef3c7;border-color:#fde047;">
+        <div class="mode-selector-title" style="color:#ca8a04;">🔵 شعاع کشو</div>
+        <label class="radio-option"><input type="radio" name="drawerRadiusMode" value="unified" checked onchange="toggleDrawerRadiusMode()"><span>یکپارچه</span></label>
+        <label class="radio-option"><input type="radio" name="drawerRadiusMode" value="topbottom" onchange="toggleDrawerRadiusMode()"><span>بالا/پایین</span></label>
+        <label class="radio-option"><input type="radio" name="drawerRadiusMode" value="corners" onchange="toggleDrawerRadiusMode()"><span>هر 4 گوشه</span></label>
+      </div>
+      <div id="drawerRadiusUnified"><div class="form-field"><label>شعاع</label><input id="RDraw" type="number" value="10" class="saveable"></div></div>
+      <div id="drawerRadiusTopBottom" style="display:none;">
+        <div class="control-group">
+          <div class="form-field"><label>شعاع بالا</label><input id="RtDraw" type="number" value="10" class="saveable"></div>
+          <div class="form-field"><label>شعاع پایین</label><input id="RbDraw" type="number" value="10" class="saveable"></div>
+        </div>
+      </div>
+      <div id="drawerRadiusCorners" class="radius-grid" style="display:none;">
+        <div class="form-field"><label>↖ بالا-چپ</label><input id="RDrawTL" type="number" value="10" class="saveable"></div>
+        <div class="form-field"><label>↗ بالا-راست</label><input id="RDrawTR" type="number" value="10" class="saveable"></div>
+        <div class="form-field"><label>↙ پایین-چپ</label><input id="RDrawBL" type="number" value="10" class="saveable"></div>
+        <div class="form-field"><label>↘ پایین-راست</label><input id="RDrawBR" type="number" value="10" class="saveable"></div>
+      </div>
+      <label style="margin:10px 0 6px;display:block;">لایه‌های آفست</label>
+      <div id="drawLayersDiv"></div>
+      <button class="btn-action btn-secondary" style="padding:9px;font-size:12px;margin-top:6px;" onclick="addLayer('draw')">+ افزودن لایه</button>
+      <div class="control-group" style="margin-top:10px;">
+        <div class="form-field"><label>گام شیار</label><input id="DrS" type="number" value="40" class="saveable"></div>
+        <div class="form-field"><label>زاویه (°)</label><input id="DrAngle" type="number" value="0" class="saveable"></div>
+      </div>
+      <div class="form-field"><label>حالت شیار</label>
+        <select id="Drmode" class="saveable"><option value="H">تک جهت</option><option value="Both">شبکه دوجهته</option></select>
+      </div>
+      <div class="groove-name-section"><label>🏷️ نام لایه شیارها</label><input type="text" id="grooveName_draw" value="GROOVES_DRAW" class="saveable"></div>
+    </div>
+    <button class="btn-action btn-dxf" onclick="downloadDXF()">🛠️ دانلود فایل DXF</button>
+  </div>
+  <div class="preview-area">
+    <div class="preview-info" id="previewInfo">
+      <div style="font-size:10px;opacity:.7;margin-bottom:3px;">پیش‌نمایش زنده</div>
+      <div id="dimensionInfo">—</div>
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" onclick="switchView('2d')" id="btn2D">📐 نمای 2D</button>
+      <button class="view-btn" onclick="switchView('3d')" id="btn3D">🎮 نمای 3D</button>
+    </div>
+    <div class="controls-info" id="controls3DInfo" style="display:none;">🔄 <strong>اسکرول:</strong> زوم &nbsp; 🖱️ <strong>درگ:</strong> چرخش</div>
+    <svg id="svgMain" class="active"></svg>
+    <canvas id="canvas3D"></canvas>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  Bit Library Data & Logic
+// ══════════════════════════════════════════
+const BIT_GROUPS = [
+  {name:'B8',   label:'Ball 8mm',  color:'#ef4444', layers:['ball8H2','ball8H2.4','ball8H1','Ball8H5','Ball8H7','ball8_Diriling_H4']},
+  {name:'NAV',  label:'Navdoni',   color:'#22c55e', layers:['Navdoni_K_H5','Navdoni_K_H8','NavdoniH9gerd','NavdoniH9along']},
+  {name:'2P',   label:'2 Pele',    color:'#ec4899', layers:['2peleH5','2peleH7','2pele_Kaf_H5','2pele_Kaf_H8']},
+  {name:'3P',   label:'3 Pele',    color:'#a855f7', layers:['3peleH5','3peleH7']},
+  {name:'B19',  label:'Ball 19mm', color:'#14b8a6', layers:['ball19H3']},
+  {name:'B25',  label:'Ball 25mm', color:'#fb923c', layers:['ball25H3','ball25H5','ball25H7','ball25H8','ball25H6drilling','ball25H8(Taj)','ball25H13(Taj)','ball25_3D']},
+  {name:'K25',  label:'Kaf 25mm',  color:'#3b82f6', layers:['kaf_25mmH3','kaf_25mmH4','kaf_25mmH5','kaf_25mmH7','kaf_25mmH8']},
+  {name:'V90',  label:'V90',       color:'#fb923c', layers:['V90H4','V90v_bit','V90H2(saf)','V90H5(saf)','V90H8(saf)']},
+  {name:'V120', label:'V120',      color:'#e879f9', layers:['v120H3.5','v120H4','V120H4labedor','v120H6','v120H8','V120H10','V120H11','V120_Vbit','V120_EG_H6','V120_EG_H7','V120_EG_H8','V120_EG_H9','V120_EG_H11']},
+  {name:'V140', label:'V140',      color:'#38bdf8', layers:['V140H4','V140H5','V140H6.5','V140H8','V140v_bit','V140_EG_H2','V140_EG_H4','V140_EG_H5','V140_EG_H6','V140_EG_H7','V140_EG_H8']},
+  {name:'GOL',  label:'Golnoghtei',color:'#fb923c', layers:['Golnoghtei_H5.5','Golnoghtei_H8','Golnoghtei_H9']},
+  {name:'K6',   label:'Kaf 6mm',   color:'#a78bfa', layers:['kaf_6mmH3','kaf_6mmH4','kaf_6mmH5','kaf_6mmH6','kaf_6mmH7','kaf_6mmH8','kaf_6mmH10']},
+  {name:'CUT',  label:'Cut/Main',  color:'#60a5fa', layers:['cut6mm']},
+];
+
+let _bitActiveFilter = 'all';
+
+function initBitLibrary() {
+  const tabsEl = document.getElementById('bitFilterTabs');
+  const totalLayers = BIT_GROUPS.reduce((s,g)=>s+g.layers.length,0);
+  document.getElementById('bitCountBadge').textContent = totalLayers + ' لایه';
+  let html = `<button onclick="setBitFilter('all',this)" class="bit-filter-btn active" style="--bfc:rgba(255,255,255,.9)">همه</button>`;
+  BIT_GROUPS.forEach(g => {
+    html += `<button onclick="setBitFilter('${g.name}',this)" class="bit-filter-btn" style="--bfc:${g.color}">${g.name}</button>`;
+  });
+  tabsEl.innerHTML = html;
+  renderBitList();
+}
+
+function renderBitList() {
+  const container = document.getElementById('bitListContainer');
+  if (!container) return;
+  const q = (document.getElementById('bitSearch')?.value || '').toLowerCase().trim();
+  let groups = _bitActiveFilter === 'all' ? BIT_GROUPS : BIT_GROUPS.filter(g => g.name === _bitActiveFilter);
+  if (q) {
+    groups = groups.map(g => ({...g, layers: g.layers.filter(l => l.toLowerCase().includes(q))})).filter(g => g.layers.length > 0);
+  }
+  const total = groups.reduce((s,g) => s + g.layers.length, 0);
+  if (!total) {
+    container.innerHTML = '<div style="text-align:center;padding:18px;color:rgba(255,255,255,.3);font-size:11px;">نتیجه‌ای یافت نشد</div>';
+    return;
+  }
+  let html = '';
+  groups.forEach((g, gi) => {
+    if (gi > 0) html += '<div class="bit-sep"></div>';
+    g.layers.forEach(layerName => {
+      const displayName = q
+        ? layerName.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')','gi'),
+            '<mark style="background:#fbbf24;color:#000;border-radius:2px;padding:0 1px;">$1</mark>')
+        : layerName;
+      html += `<div class="bit-row"
+        onclick="applyBitLayer('${layerName}')"
+        ondblclick="copyBitText('${layerName}')">
+        <div class="bit-dot" style="background:${g.color};box-shadow:0 0 5px ${g.color}66"></div>
+        <div class="bit-name">${displayName}</div>
+        <div class="bit-tag" style="background:${g.color}22;color:${g.color}">${g.name}</div>
+      </div>`;
+    });
+  });
+  container.innerHTML = html;
+}
+
+function setBitFilter(filter, btn) {
+  _bitActiveFilter = filter;
+  document.querySelectorAll('.bit-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBitList();
+}
+
+function applyBitLayer(layerName) {
+  const el = document.getElementById('layerName_main');
+  if (el) {
+    el.value = layerName;
+    draw();
+    el.style.transition = 'background .15s';
+    el.style.background = '#d1fae5';
+    setTimeout(() => { el.style.background = ''; }, 700);
+  }
+  showBitToast('✅ اعمال شد: ' + layerName);
+}
+
+function copyBitText(layerName) {
+  navigator.clipboard?.writeText(layerName)
+    .then(() => showBitToast('📋 کپی شد: ' + layerName))
+    .catch(() => showBitToast('📋 ' + layerName));
+}
+
+function showBitToast(msg) {
+  let t = document.getElementById('_bitToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_bitToast';
+    t.style.cssText = 'position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(16px);background:#059669;color:white;padding:8px 20px;border-radius:16px;font-size:11px;font-weight:700;opacity:0;transition:all .25s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.35);font-family:Segoe UI,sans-serif;direction:rtl;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(16px)';
+  }, 2200);
+}
+</script>
+
+<script>
+// ══════════════════════════════════════════
+//  اتصال Supabase (ذخیره ابری بجای localStorage)
+// ══════════════════════════════════════════
+const SB_URL = 'https://uhofpucwpikudqugodcn.supabase.co';
+const SB_KEY = 'sb_publishable_-Ru1QsLijUXolslJC9zkXw_bv73EqPB';
+const sbH = () => ({'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY});
+
+async function sbSelect(table, filter=''){
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`, {headers:{...sbH(),'Prefer':'return=representation'}});
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+async function sbUpsert(table, row){
+  const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method:'POST',
+    headers:{...sbH(),'Prefer':'resolution=merge-duplicates,return=representation'},
+    body: JSON.stringify(row)
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+async function sbDelete(table, id){
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {method:'DELETE', headers:sbH()});
+  if(!res.ok) throw new Error(await res.text());
+}
+
+function setSyncStatus(state, msg){
+  let bar = document.getElementById('sbSyncBar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'sbSyncBar';
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:3px;z-index:99999;transition:.3s;opacity:0;';
+    document.body.appendChild(bar);
+  }
+  if(state==='sync'){ bar.style.background='linear-gradient(90deg,#378ADD,#00F0FF)'; bar.style.opacity='1'; }
+  else if(state==='ok'){ bar.style.opacity='0'; }
+  else if(state==='err'){ bar.style.background='#E24B4A'; bar.style.opacity='1'; console.error(msg); if(window.alert) alert('خطا در ارتباط با سرور: '+msg); }
+}
+</script>
+<script>
+// ══════════════════════════════════════════
+//  متغیرهای اصلی
+// ══════════════════════════════════════════
+let projects = [];
+let currentProjectIndex = -1;
+let layersPro = {
+  door: [{n:'OFF1',v:0},{n:'OFF2',v:15}],
+  draw: [{n:'D_OFF1',v:10},{n:'D_OFF2',v:10}]
+};
+let crownData = null, baseboardData = null;
+let slotShelves = {};
+let bayOpen = {};
+let bayFrameLayer = {};
+let _doorIdxCounter2D = 0;
+let layerNamePresets = [];
+
+let scene, camera, renderer, orbitControls3D;
+let cabinetGroup;
+let current3DView = '2d';
+let animationId;
+const MATERIALS = {};
+
+// ══════════════════════════════════════════
+//  توابع کمکی
+// ══════════════════════════════════════════
+const v = id => { const el = document.getElementById(id); return el ? (el.type==='checkbox'?el.checked:+el.value) : 0; };
+const s = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+const ln = key => s('layerName_' + key) || ({main:'cut6mm',slotCut:'SLOT_DRAWER_cut',crown:'CROWN',baseboard:'BASEBOARD',bayCut:'DRAW_IN_cut',shelf:'SHELF'}[key]||key);
+
+function setTab(t, el) {
+  document.querySelectorAll('.tab,.tab-content').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  مدیریت متریال
+// ══════════════════════════════════════════
+function hexToInt(hex) { return parseInt(hex.replace('#',''), 16); }
+
+function buildMaterials() {
+  MATERIALS.body   = new THREE.MeshStandardMaterial({color:hexToInt(s('mat_body')||'#c8974a'), roughness:v('mat_roughness')/100, side:THREE.DoubleSide});
+  MATERIALS.panel  = new THREE.MeshStandardMaterial({color:hexToInt(s('mat_panel')||'#d4a96a'), roughness:v('mat_roughness')/100});
+  MATERIALS.edge   = new THREE.MeshStandardMaterial({color:hexToInt(s('mat_edge')||'#8B5E3C'), roughness:0.4, metalness:0.1});
+  MATERIALS.groove = new THREE.MeshStandardMaterial({color:0x0d0a06, roughness:0.98});
+  MATERIALS.shelf  = new THREE.MeshStandardMaterial({color:hexToInt(s('mat_shelf')||'#d4a96a'), roughness:0.7, side:THREE.DoubleSide});
+  MATERIALS.handle = new THREE.MeshStandardMaterial({color:hexToInt(s('mat_handle')||'#c0c8d4'), metalness:v('mat_metalness')/100, roughness:0.12});
+  MATERIALS.ghost  = new THREE.MeshStandardMaterial({color:hexToInt(s('mat_panel')||'#d4a96a'), transparent:true, opacity:0.13, side:THREE.DoubleSide, depthWrite:false});
+  MATERIALS.frameDetail = new THREE.MeshStandardMaterial({color:hexToInt(s('mat_edge')||'#8B5E3C'), roughness:0.7});
+}
+
+function updateMaterials() {
+  if (!MATERIALS.body) return;
+  MATERIALS.body.color.setHex(hexToInt(s('mat_body')||'#c8974a'));
+  MATERIALS.body.roughness = v('mat_roughness')/100;
+  MATERIALS.panel.color.setHex(hexToInt(s('mat_panel')||'#d4a96a'));
+  MATERIALS.panel.roughness = v('mat_roughness')/100;
+  MATERIALS.edge.color.setHex(hexToInt(s('mat_edge')||'#8B5E3C'));
+  MATERIALS.handle.color.setHex(hexToInt(s('mat_handle')||'#c0c8d4'));
+  MATERIALS.handle.metalness = v('mat_metalness')/100;
+  MATERIALS.shelf.color.setHex(hexToInt(s('mat_shelf')||'#d4a96a'));
+  if (MATERIALS.frameDetail) MATERIALS.frameDetail.color.setHex(hexToInt(s('mat_edge')||'#8B5E3C'));
+  if (scene) scene.background = new THREE.Color(hexToInt(s('mat_bg')||'#14121a'));
+  if (scene) render3D();
+}
+
+function resetMaterials() {
+  document.getElementById('mat_body').value='#c8974a';
+  document.getElementById('mat_panel').value='#d4a96a';
+  document.getElementById('mat_edge').value='#8B5E3C';
+  document.getElementById('mat_handle').value='#c0c8d4';
+  document.getElementById('mat_shelf').value='#d4a96a';
+  document.getElementById('mat_bg').value='#14121a';
+  document.getElementById('mat_crown').value='#b87333';
+  document.getElementById('mat_baseboard').value='#b87333';
+  const ef=document.getElementById('mat_engrave_frame');if(ef)ef.value='#2a1508';
+  const eg=document.getElementById('mat_engrave_groove');if(eg)eg.value='#150a04';
+  const ee=document.getElementById('engrave_enabled');if(ee)ee.checked=true;
+  document.getElementById('mat_roughness').value=65;
+  document.getElementById('mat_metalness').value=92;
+  updateMaterials();
+}
+
+// ══════════════════════════════════════════
+//  کتابخانه نام لایه - پریست‌ها
+// ══════════════════════════════════════════
+async function saveLayerNamePreset() {
+  const name = document.getElementById('layerPresetName').value.trim();
+  if (!name) return;
+  const preset = { name, main:s('layerName_main'), slotCut:s('layerName_slotCut'), crown:s('layerName_crown'), baseboard:s('layerName_baseboard'), bayCut:s('layerName_bayCut'), shelf:s('layerName_shelf') };
+  const idx = layerNamePresets.findIndex(p=>p.name===name);
+  const id = idx>=0 ? layerNamePresets[idx].id : (Date.now().toString());
+  preset.id = id;
+  if (idx>=0) layerNamePresets[idx]=preset; else layerNamePresets.push(preset);
+  document.getElementById('layerPresetName').value='';
+  renderLayerNamePresets();
+  setSyncStatus('sync');
+  try{
+    await sbUpsert('door_layer_name_presets', {id, name, data:preset});
+    setSyncStatus('ok');
+  }catch(e){ setSyncStatus('err', e.message); }
+}
+function applyLayerNamePreset(idx) {
+  const p = layerNamePresets[idx]; if (!p) return;
+  ['main','slotCut','crown','baseboard','bayCut','shelf'].forEach(k=>{ const el=document.getElementById('layerName_'+k); if(el&&p[k])el.value=p[k]; });
+  draw();
+}
+async function deleteLayerNamePreset(idx) {
+  const p = layerNamePresets[idx]; if(!p) return;
+  layerNamePresets.splice(idx,1);
+  renderLayerNamePresets();
+  setSyncStatus('sync');
+  try{
+    await sbDelete('door_layer_name_presets', p.id);
+    setSyncStatus('ok');
+  }catch(e){ setSyncStatus('err', e.message); }
+}
+function renderLayerNamePresets() {
+  const container = document.getElementById('layerNamePresetList'); if (!container) return;
+  if (!layerNamePresets.length) { container.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,.5);text-align:center;padding:8px;">هنوز پریستی ذخیره نشده</div>'; return; }
+  container.innerHTML = layerNamePresets.map((p,i)=>`<div class="preset-item"><span>${p.name}</span><button onclick="applyLayerNamePreset(${i})" style="padding:3px 7px;background:rgba(255,255,255,.9);color:#0f766e;border:none;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;">اعمال</button><button onclick="deleteLayerNamePreset(${i})" style="padding:3px 6px;background:rgba(239,68,68,.3);color:white;border:none;border-radius:4px;cursor:pointer;font-size:10px;">×</button></div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  toggle توابع
+// ══════════════════════════════════════════
+function toggleAutoDrawer() {
+  const auto = v('autoDrawer');
+  document.getElementById('manualDrawerHeight').style.display = auto?'none':'block';
+  document.getElementById('drHTotalField').style.display = auto?'none':'block';
+  document.getElementById('drHEachField').style.display = auto?'block':'none';
+  draw();
+}
+function toggleDoorMarginMode() {
+  const m = document.querySelector('input[name="doorMarginMode"]:checked').value;
+  document.getElementById('doorMarginUnified').style.display = m==='unified'?'block':'none';
+  document.getElementById('doorMarginSeparate').style.display = m==='separate'?'block':'none';
+  document.getElementById('doorMarginFourSide').style.display = m==='fourside'?'block':'none';
+  draw();
+}
+function toggleDoorRadiusMode() {
+  const m = document.querySelector('input[name="doorRadiusMode"]:checked').value;
+  document.getElementById('doorRadiusUnified').style.display = m==='unified'?'block':'none';
+  document.getElementById('doorRadiusTopBottom').style.display = m==='topbottom'?'block':'none';
+  document.getElementById('doorRadiusCorners').style.display = m==='corners'?'block':'none';
+  draw();
+}
+function toggleDrawerMarginMode() {
+  const m = document.querySelector('input[name="drawerMarginMode"]:checked').value;
+  document.getElementById('drawerMarginUnified').style.display = m==='unified'?'block':'none';
+  document.getElementById('drawerMarginSeparate').style.display = m==='separate'?'block':'none';
+  document.getElementById('drawerMarginFourSide').style.display = m==='fourside'?'block':'none';
+  draw();
+}
+function toggleDrawerRadiusMode() {
+  const m = document.querySelector('input[name="drawerRadiusMode"]:checked').value;
+  document.getElementById('drawerRadiusUnified').style.display = m==='unified'?'block':'none';
+  document.getElementById('drawerRadiusTopBottom').style.display = m==='topbottom'?'block':'none';
+  document.getElementById('drawerRadiusCorners').style.display = m==='corners'?'block':'none';
+  draw();
+}
+
+function getFrameWidth(bayIdx) {
+  const selectedIdx = bayFrameLayer[bayIdx] ?? (layersPro.door.length - 1);
+  let total = 0;
+  for (let i = 0; i <= Math.min(selectedIdx, layersPro.door.length-1); i++) { total += layersPro.door[i].v || 0; }
+  return Math.max(10, total);
+}
+function getDoorMargin() {
+  const m = document.querySelector('input[name="doorMarginMode"]:checked').value;
+  if (m==='unified') { const x=v('Pmargin'); return {top:x,bottom:x,left:x,right:x}; }
+  if (m==='separate') { const vv=v('PmarginV'),hh=v('PmarginH'); return {top:vv,bottom:vv,left:hh,right:hh}; }
+  return {top:v('PmarginTop'),bottom:v('PmarginBottom'),left:v('PmarginLeft'),right:v('PmarginRight')};
+}
+function getDoorRadius() {
+  const m = document.querySelector('input[name="doorRadiusMode"]:checked').value;
+  if (m==='unified') { const r=v('RDoor'); return {tl:r,tr:r,bl:r,br:r}; }
+  if (m==='topbottom') { const rt=v('RtDoor'),rb=v('RbDoor'); return {tl:rt,tr:rt,bl:rb,br:rb}; }
+  return {tl:v('RDoorTL'),tr:v('RDoorTR'),bl:v('RDoorBL'),br:v('RDoorBR')};
+}
+function getDrawerMargin() {
+  const m = document.querySelector('input[name="drawerMarginMode"]:checked').value;
+  if (m==='unified') { const x=v('DrMargin'); return {top:x,bottom:x,left:x,right:x}; }
+  if (m==='separate') { const vv=v('DrMarginV'),hh=v('DrMarginH'); return {top:vv,bottom:vv,left:hh,right:hh}; }
+  return {top:v('DrMarginTop'),bottom:v('DrMarginBottom'),left:v('DrMarginLeft'),right:v('DrMarginRight')};
+}
+function getDrawerRadius() {
+  const m = document.querySelector('input[name="drawerRadiusMode"]:checked').value;
+  if (m==='unified') { const r=v('RDraw'); return {tl:r,tr:r,bl:r,br:r}; }
+  if (m==='topbottom') { const rt=v('RtDraw'),rb=v('RbDraw'); return {tl:rt,tr:rt,bl:rb,br:rb}; }
+  return {tl:v('RDrawTL'),tr:v('RDrawTR'),bl:v('RDrawBL'),br:v('RDrawBR')};
+}
+
+// ══════════════════════════════════════════
+//  نمای 2D/3D
+// ══════════════════════════════════════════
+function switchView(mode) {
+  current3DView = mode;
+  const svg = document.getElementById('svgMain');
+  const canvas = document.getElementById('canvas3D');
+  const btn2D = document.getElementById('btn2D');
+  const btn3D = document.getElementById('btn3D');
+  const info = document.getElementById('controls3DInfo');
+  if (mode==='2d') {
+    svg.style.display=''; canvas.style.display='none';
+    btn2D.classList.add('active'); btn3D.classList.remove('active');
+    info.style.display='none';
+    if (animationId) { cancelAnimationFrame(animationId); animationId=null; }
+  } else {
+    svg.style.display='none'; canvas.style.display='block';
+    canvas.classList.add('active');
+    btn2D.classList.remove('active'); btn3D.classList.add('active');
+    info.style.display='block';
+    if (!scene) { requestAnimationFrame(()=>{ init3D(); render3D(); setTimeout(onWindowResize,50); }); }
+    else { render3D(); animate3D(); }
+  }
+}
+</script>
+<script>
+// ══════════════════════════════════════════
+//  Three.js - راه‌اندازی
+// ══════════════════════════════════════════
+function init3D() {
+  const canvas = document.getElementById('canvas3D');
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x2a2a3e);
+  const W = canvas.offsetWidth||800, Hc = canvas.offsetHeight||600;
+  camera = new THREE.PerspectiveCamera(45, W/Hc, 10, 30000);
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setSize(W,Hc);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.9;
+  buildMaterials();
+  buildRoom();
+  orbitControls3D = new THREE.OrbitControls(camera, renderer.domElement);
+  orbitControls3D.enableDamping  = false;
+  orbitControls3D.dampingFactor  = 0.05;
+  orbitControls3D.enableRotate   = true;
+  orbitControls3D.rotateSpeed    = 0.18;
+  orbitControls3D.enablePan      = false;
+  orbitControls3D.enableZoom     = true;
+  orbitControls3D.zoomSpeed      = 0.7;
+  orbitControls3D.minDistance    = 300;
+  orbitControls3D.maxDistance    = 4000;
+  const fixedPolar = Math.PI/2 - 0.22;
+  orbitControls3D.minPolarAngle  = fixedPolar;
+  orbitControls3D.maxPolarAngle  = fixedPolar;
+  orbitControls3D.update();
+  window.addEventListener('resize', onWindowResize, false);
+  animate3D();
+}
+
+function buildRoom() {
+  const old = scene.getObjectByName('roomGroup');
+  if (old) { scene.remove(old); old.traverse(c=>{ if(c.geometry) c.geometry.dispose(); }); }
+  const RW=5000, RH=3000, RD=4000;
+  const roomGroup = new THREE.Group(); roomGroup.name='roomGroup';
+
+  const floorColor = hexToInt(s('mat_floor')||'#c8a96e');
+  const wallColor  = hexToInt(s('mat_wall') ||'#e8dfc8');
+  const ceilColor  = hexToInt(s('mat_ceil') ||'#f5f0e8');
+
+  const floorMat  = new THREE.MeshStandardMaterial({color:floorColor, roughness:0.55, metalness:0.04});
+  const groutMat  = new THREE.MeshStandardMaterial({color:0x00000020, roughness:0.9, transparent:true, opacity:0.25});
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(RW,RD), floorMat);
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; roomGroup.add(floor);
+  for(let i=-10;i<=10;i++){const g=new THREE.Mesh(new THREE.PlaneGeometry(RW,3),groutMat);g.rotation.x=-Math.PI/2;g.position.set(0,0.5,i*180);roomGroup.add(g);}
+  for(let i=-15;i<=15;i++){const g=new THREE.Mesh(new THREE.PlaneGeometry(3,RD),groutMat);g.rotation.x=-Math.PI/2;g.position.set(i*150,0.6,0);roomGroup.add(g);}
+
+  const wallLoMat = new THREE.MeshStandardMaterial({color:wallColor, roughness:0.88});
+  const wallHiMat = new THREE.MeshStandardMaterial({color:ceilColor, roughness:0.92});
+  const splitH = RH*0.42;
+  const wLo = new THREE.Mesh(new THREE.PlaneGeometry(RW, splitH), wallLoMat);
+  wLo.position.set(0, splitH/2, RD/2); wLo.rotation.y=Math.PI; wLo.receiveShadow=true; roomGroup.add(wLo);
+  const wHi = new THREE.Mesh(new THREE.PlaneGeometry(RW, RH-splitH), wallHiMat);
+  wHi.position.set(0, splitH+(RH-splitH)/2, RD/2); wHi.rotation.y=Math.PI; wHi.receiveShadow=true; roomGroup.add(wHi);
+  const divMat = new THREE.MeshStandardMaterial({color:0xa07840, roughness:0.6});
+  roomGroup.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(RW,16,10),divMat);_m.position.set(0,splitH,RD/2-5);return _m;})());
+
+  const sideMat = new THREE.MeshStandardMaterial({color:wallColor, roughness:0.88});
+  const lW = new THREE.Mesh(new THREE.PlaneGeometry(RD,RH),sideMat);
+  lW.position.set(-RW/2,RH/2,0); lW.rotation.y=Math.PI/2; lW.receiveShadow=true; roomGroup.add(lW);
+  const rW = new THREE.Mesh(new THREE.PlaneGeometry(RD,RH),sideMat);
+  rW.position.set(RW/2,RH/2,0); rW.rotation.y=-Math.PI/2; rW.receiveShadow=true; roomGroup.add(rW);
+
+  const skMat = new THREE.MeshStandardMaterial({color:ceilColor, roughness:0.55});
+  [[-RW/2,0],[RW/2,0]].forEach(([sx,sz])=>{const sk=new THREE.Mesh(new THREE.BoxGeometry(10,80,RD),skMat);sk.position.set(sx,40,0);roomGroup.add(sk);});
+  roomGroup.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(RW,80,10),skMat);_m.position.set(0,40,RD/2);return _m;})());
+
+  const moldMat = new THREE.MeshStandardMaterial({color:ceilColor, roughness:0.5});
+  roomGroup.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(RW,30,14),moldMat);_m.position.set(0,RH-15,RD/2-7);return _m;})());
+  [[-RW/2,0],[RW/2,0]].forEach(([sx])=>{roomGroup.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(14,30,RD),moldMat);_m.position.set(sx,RH-15,0);return _m;})());});
+
+  const ceilMat2 = new THREE.MeshStandardMaterial({color:ceilColor, roughness:0.95});
+  const ceil2 = new THREE.Mesh(new THREE.PlaneGeometry(RW,RD),ceilMat2);
+  ceil2.rotation.x=Math.PI/2; ceil2.position.y=RH; roomGroup.add(ceil2);
+
+  const frameData = [[-900,1600,380,500,0x3d2810,0x7090b8],[900,1700,320,420,0x1a1a1a,0xc8a870]];
+  frameData.forEach(([fx,fy,fw,fh,fc,ac])=>{
+    const fMat=new THREE.MeshStandardMaterial({color:fc,roughness:0.45,metalness:0.15});
+    const aMat=new THREE.MeshStandardMaterial({color:ac,roughness:0.75});
+    const _f=new THREE.Mesh(new THREE.BoxGeometry(fw+28,fh+28,18),fMat);_f.position.set(fx,fy,RD/2-9);_f.rotation.y=Math.PI;roomGroup.add(_f);
+    const _a=new THREE.Mesh(new THREE.BoxGeometry(fw,fh,6),aMat);_a.position.set(fx,fy,RD/2-18);_a.rotation.y=Math.PI;roomGroup.add(_a);
+  });
+
+  const potMat=new THREE.MeshStandardMaterial({color:0x8b6040,roughness:0.7});
+  const leafMat=new THREE.MeshStandardMaterial({color:0x1e5e1e,roughness:0.8});
+  for(let i=0;i<5;i++){const seg=new THREE.Mesh(new THREE.CylinderGeometry(55+i*8,50+i*8,25,10),potMat);seg.position.set(-RW/2+220,12+i*25,-600);roomGroup.add(seg);}
+  [[-55,180,-660],[55,240,-540],[0,310,-600],[-80,280,-555],[80,200,-645],[0,380,-595]].forEach(([lx,ly,lz])=>{
+    const lf=new THREE.Mesh(new THREE.SphereGeometry(42,6,4),leafMat);lf.scale.set(1,1.5,0.35);lf.position.set(-RW/2+220+lx,ly,lz);roomGroup.add(lf);
+  });
+
+  const CAB_Z = RD/2 - 225;
+  const SIDE_X = 1100;
+  const tMat=new THREE.MeshStandardMaterial({color:0x5c3820,roughness:0.55,metalness:0.03});
+  const tTop=new THREE.Mesh(new THREE.BoxGeometry(450,22,300),tMat);
+  tTop.position.set(SIDE_X,620,CAB_Z); tTop.castShadow=true; tTop.receiveShadow=true; roomGroup.add(tTop);
+  [[180,120],[180,-120],[-180,120],[-180,-120]].forEach(([tx,tz])=>{
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(12,12,600,8),tMat);
+    leg.position.set(SIDE_X+tx,310,CAB_Z+tz);leg.castShadow=true;roomGroup.add(leg);
+  });
+  const bkMat=new THREE.MeshStandardMaterial({color:0x8b1a1a,roughness:0.7});
+  const bk=new THREE.Mesh(new THREE.BoxGeometry(160,22,120),bkMat);bk.position.set(SIDE_X+30,643,CAB_Z-30);bk.rotation.y=0.25;bk.castShadow=true;roomGroup.add(bk);
+  const vMat=new THREE.MeshStandardMaterial({color:0xb09050,roughness:0.35,metalness:0.4});
+  const vs=new THREE.Mesh(new THREE.CylinderGeometry(25,18,90,10),vMat);vs.position.set(SIDE_X-120,665,CAB_Z+20);vs.castShadow=true;roomGroup.add(vs);
+
+  const LAMP_X = SIDE_X + 300;
+  const lpMat=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.3,metalness:0.8});
+  const lsMat=new THREE.MeshStandardMaterial({color:0xf0e0b0,roughness:0.5,side:THREE.DoubleSide,emissive:0xffcc60,emissiveIntensity:0.4,transparent:true,opacity:0.85});
+  roomGroup.add((()=>{const _m=new THREE.Mesh(new THREE.CylinderGeometry(45,60,30,10),lpMat);_m.position.set(LAMP_X,15,CAB_Z);return _m;})());
+  roomGroup.add((()=>{const _m=new THREE.Mesh(new THREE.CylinderGeometry(8,8,1100,8),lpMat);_m.position.set(LAMP_X,565,CAB_Z);return _m;})());
+  roomGroup.add((()=>{const _m=new THREE.Mesh(new THREE.CylinderGeometry(160,90,240,14,1,true),lsMat);_m.position.set(LAMP_X,1240,CAB_Z);return _m;})());
+
+  const fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xfff8e0,emissiveIntensity:2,roughness:0.1});
+  [[0,-200],[-800,400],[800,400]].forEach(([lx,lz])=>{
+    const disc=new THREE.Mesh(new THREE.CircleGeometry(45,12),fixMat);disc.rotation.x=Math.PI/2;disc.position.set(lx,RH-1,lz);roomGroup.add(disc);
+  });
+
+  scene.add(roomGroup);
+
+  const toRemove=[]; scene.traverse(c=>{if(c.isLight)toRemove.push(c);}); toRemove.forEach(l=>scene.remove(l));
+  scene.add(new THREE.AmbientLight(0xfff0e0, 0.25));
+  scene.add(new THREE.HemisphereLight(0xffe8c0, 0x402010, 0.3));
+  const keyLight = new THREE.DirectionalLight(0xfff5dc, 1.6);
+  keyLight.position.set(-1800, 2800, -1200); keyLight.castShadow=true;
+  keyLight.shadow.mapSize.set(4096,4096);
+  keyLight.shadow.camera.near=100; keyLight.shadow.camera.far=10000;
+  keyLight.shadow.camera.left=-3000; keyLight.shadow.camera.right=3000;
+  keyLight.shadow.camera.top=3000; keyLight.shadow.camera.bottom=-3000;
+  keyLight.shadow.bias=-0.0002; keyLight.shadow.normalBias=1.5;
+  scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.35);
+  fillLight.position.set(2000,1500,-800); scene.add(fillLight);
+  const lampLight = new THREE.PointLight(0xffaa30, 1.8, 1400, 2.0);
+  lampLight.position.set(LAMP_X, 1100, CAB_Z); scene.add(lampLight);
+  [[0,-200],[-800,400],[800,400]].forEach(([lx,lz])=>{
+    const pt=new THREE.PointLight(0xfff0cc, 0.5, 1600, 1.8);
+    pt.position.set(lx,RH-60,lz); scene.add(pt);
+  });
+  const rimLight = new THREE.DirectionalLight(0xffeedd, 0.4);
+  rimLight.position.set(0, 1000, 2000); scene.add(rimLight);
+}
+
+function onWindowResize() {
+  if (!renderer||!camera) return;
+  const c = document.getElementById('canvas3D');
+  const W = c.offsetWidth||800, H = c.offsetHeight||600;
+  camera.aspect = W/H; camera.updateProjectionMatrix(); renderer.setSize(W,H);
+}
+
+function animate3D() {
+  if (current3DView!=='3d') return;
+  animationId = requestAnimationFrame(animate3D);
+  if (orbitControls3D) orbitControls3D.update();
+  renderer.render(scene, camera);
+}
+
+// ══════════════════════════════════════════
+//  Three.js - رندر کابینت
+// ══════════════════════════════════════════
+function render3D() {
+  if (!scene) return;
+  if (cabinetGroup) {
+    scene.remove(cabinetGroup);
+    cabinetGroup.traverse(child=>{ if(child.geometry) child.geometry.dispose(); });
+  }
+  cabinetGroup = new THREE.Group();
+  createPanelMesh._doorIdx = 0;
+
+  const W=v('W'), H=v('H'), G=v('G'), Cw=v('Cw');
+  const DEPTH=450, THICKNESS=16;
+  const PANEL_OFFSET = 3;
+  const ox=W/2, oy=-H/2, oz=-DEPTH/2;
+  const poz = oz - PANEL_OFFSET;
+
+  createCabinetBody(ox,oy,oz,W,H,DEPTH,THICKNESS);
+
+  const crownH3D = crownData ? crownData.bounds.height : (v('crownThickness')||0);
+  const crownColor = hexToInt(s('mat_crown')||'#b87333');
+  if (crownH3D > 0) {
+    if (crownData) {
+      buildDecor3D(crownData, ox - W, oy, crownH3D, oz, DEPTH, 'top', crownColor);
+    } else {
+      const crownMat = new THREE.MeshStandardMaterial({color: crownColor, roughness: v('mat_roughness')/100});
+      const m = new THREE.Mesh(new THREE.BoxGeometry(W, crownH3D, DEPTH), crownMat);
+      m.position.set(ox - W/2, oy - crownH3D/2, oz + DEPTH/2);
+      m.castShadow=true; m.receiveShadow=true; cabinetGroup.add(m);
+      const e = new THREE.Mesh(new THREE.BoxGeometry(W, crownH3D, 4), MATERIALS.edge);
+      e.position.set(ox - W/2, oy - crownH3D/2, oz - 2); cabinetGroup.add(e);
+    }
+  }
+
+  const baseH3D = baseboardData ? baseboardData.bounds.height : (v('baseboardThickness')||0);
+  const baseColor = hexToInt(s('mat_baseboard')||'#b87333');
+  if (baseH3D > 0) {
+    const coverMat = new THREE.MeshStandardMaterial({color: hexToInt(s('mat_body')||'#c8974a'), roughness: v('mat_roughness')/100});
+    const backCover = new THREE.Mesh(new THREE.BoxGeometry(W, baseH3D, THICKNESS), coverMat);
+    backCover.position.set(ox - W/2, oy + H + baseH3D/2, oz + DEPTH - THICKNESS/2);
+    cabinetGroup.add(backCover);
+    const leftCover = new THREE.Mesh(new THREE.BoxGeometry(THICKNESS, baseH3D, DEPTH), coverMat);
+    leftCover.position.set(ox - THICKNESS/2, oy + H + baseH3D/2, oz + DEPTH/2);
+    cabinetGroup.add(leftCover);
+    const rightCover = new THREE.Mesh(new THREE.BoxGeometry(THICKNESS, baseH3D, DEPTH), coverMat);
+    rightCover.position.set(ox - W + THICKNESS/2, oy + H + baseH3D/2, oz + DEPTH/2);
+    cabinetGroup.add(rightCover);
+    if (baseboardData) {
+      buildDecor3D(baseboardData, ox - W, oy + H, baseH3D, oz, DEPTH, 'bottom', baseColor);
+    } else {
+      const baseMat = new THREE.MeshStandardMaterial({color: baseColor, roughness: v('mat_roughness')/100});
+      const m = new THREE.Mesh(new THREE.BoxGeometry(W, baseH3D, DEPTH), baseMat);
+      m.position.set(ox - W/2, oy + H + baseH3D/2, oz + DEPTH/2);
+      m.castShadow=true; m.receiveShadow=true; cabinetGroup.add(m);
+      const e = new THREE.Mesh(new THREE.BoxGeometry(W, baseH3D, 4), MATERIALS.edge);
+      e.position.set(ox - W/2, oy + H + baseH3D/2, oz - 2); cabinetGroup.add(e);
+    }
+  }
+
+  if (v('hasCol')) {
+    createPanelMesh(ox-Cw,oy,poz,Cw,H,THICKNESS,'column');
+    createPanelMesh(ox-W,oy,poz,Cw,H,THICKNESS,'column');
+  }
+
+  const startX = v('hasCol')?Cw+G:0;
+  const freeW = W-(v('hasCol')?2*(Cw+G):0);
+  const dW = (freeW-(v('Dcount')-1)*G)/v('Dcount');
+  const auto=v('autoDrawer'), drHEach=v('DrHEach'), drCount=v('DrCount');
+
+  let totalDrawerZone=0;
+  if (auto&&drHEach>0) totalDrawerZone=drHEach*drCount+(drCount-1)*G;
+  else if (v('DrH')>0) totalDrawerZone=v('DrH');
+
+  let hasSlotDrawer=false; let slotDrawerSlots=[];
+  for (let d=0;d<v('Dcount');d++) {
+    if ((document.getElementById(`slot_${d}`)?.value||'door')==='door_drawer') { hasSlotDrawer=true; slotDrawerSlots.push(d); }
+  }
+  const slotMode = document.querySelector('input[name="slotDrawerMode"]:checked')?.value||'continuous';
+  let slotH = (slotMode==='continuous'&&hasSlotDrawer) ? (v('SlotDrawerH')||150) : 0;
+  const doorAreaH = totalDrawerZone>0 ? H-totalDrawerZone-G-slotH-(slotH>0?G:0) : H-slotH-(slotH>0?G:0);
+
+  const divCount = v('Dcount') - 1;
+  const divH = H - 2*THICKNESS;
+  const divDepth = DEPTH - THICKNESS;
+  for (let d=1; d<=divCount; d++) {
+    const divX = ox - startX - d*(dW+G) - THICKNESS/2;
+    const divMesh = new THREE.Mesh(new THREE.BoxGeometry(THICKNESS, divH, divDepth), MATERIALS.body);
+    divMesh.position.set(divX, oy + THICKNESS + divH/2, oz + divDepth/2);
+    divMesh.castShadow=true; divMesh.receiveShadow=true; cabinetGroup.add(divMesh);
+  }
+
+  const totalBays = v('Dcount');
+  for (let d=0;d<totalBays;d++) {
+    const dx = startX+d*(dW+G);
+    const slotType = document.getElementById(`slot_${d}`)?.value||'door';
+    const shelves3D = slotShelves[d]||0;
+    const isOpen = bayOpen[d]||false;
+    const doorMat = isOpen ? MATERIALS.ghost : MATERIALS.panel;
+
+    if (slotType==='door'||slotType==='frame') {
+      const fullH = doorAreaH+(slotMode==='continuous'?slotH+G:0);
+      const panelH = fullH-2*G;
+      if (slotType==='frame') {
+        if (!isOpen) createFrameDoor3D(ox-dx-dW, oy+G, poz, dW, panelH, THICKNESS, d, totalBays);
+      } else {
+        createPanelMesh(ox-dx-dW, oy+G, poz, dW, panelH, THICKNESS, isOpen?'door_open':'door', doorMat, d, totalBays);
+      }
+      createShelves3D(ox-dx-dW, oy+G, oz, dW, panelH, THICKNESS, shelves3D, G, DEPTH);
+    } else if (slotType==='door_drawer') {
+      if (slotMode==='separate') {
+        const slotHl=v('SlotDrawerH')||150, slotCnt=v('SlotDrawerCount')||2;
+        const doorH=doorAreaH-2*G;
+        createPanelMesh(ox-dx-dW,oy+G,poz,dW,doorH,THICKNESS,isOpen?'door_open':'door', doorMat, d, totalBays);
+        createShelves3D(ox-dx-dW,oy+G,oz,dW,doorH,THICKNESS,shelves3D,G,DEPTH);
+        const dsy=G+doorH+G, edH=(slotHl-(slotCnt-1)*G)/slotCnt;
+        for (let k=0;k<slotCnt;k++) createPanelMesh(ox-dx-dW,oy+dsy+k*(edH+G),poz,dW,edH,THICKNESS,'drawer');
+      } else {
+        createPanelMesh(ox-dx-dW,oy+G,poz,dW,doorAreaH-2*G,THICKNESS,isOpen?'door_open':'door', doorMat, d, totalBays);
+        createShelves3D(ox-dx-dW,oy+G,oz,dW,doorAreaH-2*G,THICKNESS,shelves3D,G,DEPTH);
+      }
+    } else {
+      const num=parseInt(slotType.split('_')[1]);
+      const dH=(doorAreaH-2*G-(num-1)*G)/num;
+      for (let k=0;k<num;k++) createPanelMesh(ox-dx-dW,oy+G+k*(dH+G),poz,dW,dH,THICKNESS,'drawer');
+    }
+  }
+
+  if (hasSlotDrawer&&slotMode==='continuous'&&slotH>0) {
+    const cnt=v('SlotDrawerCount')||2;
+    const first=Math.min(...slotDrawerSlots), last=Math.max(...slotDrawerSlots);
+    const dx0=startX+first*(dW+G);
+    const dW0=(last-first+1)*dW+(last-first)*G;
+    const eH=(slotH-(cnt-1)*G)/cnt;
+    const sy=G+doorAreaH;
+    for (let k=0;k<cnt;k++) createPanelMesh(ox-dx0-dW0,oy+sy+k*(eH+G),poz,dW0,eH,THICKNESS,'drawer');
+  }
+
+  if (totalDrawerZone > 0) {
+    const shelfAtY = oy + G + doorAreaH + (slotMode==='continuous'&&hasSlotDrawer?slotH+G:0);
+    const sw = freeW - 2*THICKNESS, sd = DEPTH - 2*THICKNESS;
+    const autoShelf = new THREE.Mesh(new THREE.BoxGeometry(sw, THICKNESS, sd), MATERIALS.shelf||MATERIALS.body);
+    autoShelf.position.set(ox - startX - THICKNESS - sw/2, shelfAtY + THICKNESS/2, oz + THICKNESS + sd/2);
+    autoShelf.castShadow=true; autoShelf.receiveShadow=true; cabinetGroup.add(autoShelf);
+  }
+
+  if (v('DrH')>0||(auto&&drHEach>0)) {
+    let dzY=G+doorAreaH+(slotMode==='continuous'&&hasSlotDrawer?slotH+G:0);
+    let heights=[];
+    if (auto&&drHEach>0) { for(let k=0;k<drCount;k++) heights.push(drHEach); }
+    else {
+      const lastH=v('LastDrH'), total=v('DrH');
+      if (lastH>0&&drCount>1) { const std=(total-lastH-(drCount-1)*G)/(drCount-1); for(let k=0;k<drCount-1;k++) heights.push(std); heights.push(lastH); }
+      else { const eq=(total-(drCount-1)*G)/drCount; for(let k=0;k<drCount;k++) heights.push(eq); }
+    }
+    for (let k=0;k<drCount;k++) {
+      createPanelMesh(ox-startX-freeW,oy+dzY,poz,freeW,heights[k],THICKNESS,'drawer');
+      dzY+=heights[k]+G;
+    }
+  }
+
+  cabinetGroup.rotation.z = Math.PI;
+  cabinetGroup.position.y = H/2 + baseH3D;
+  cabinetGroup.position.z = 1800 - DEPTH/2;
+  scene.add(cabinetGroup);
+
+  const bodyCenter = new THREE.Vector3(0, baseH3D + H/2, cabinetGroup.position.z);
+  const fov = camera.fov*(Math.PI/180);
+  const camDist = Math.abs(Math.max(W, H)/2/Math.tan(fov/2)) * 1.9;
+  const angle = 0.6, elev = 0.22;
+  camera.position.set(
+    bodyCenter.x + Math.sin(angle)*camDist,
+    bodyCenter.y + elev*camDist,
+    bodyCenter.z - Math.cos(angle)*camDist
+  );
+  camera.lookAt(bodyCenter.x, bodyCenter.y - H*0.05, bodyCenter.z);
+  if (orbitControls3D) {
+    orbitControls3D.target.set(bodyCenter.x, bodyCenter.y - H*0.05, bodyCenter.z);
+    orbitControls3D.minDistance = 300;
+    orbitControls3D.maxDistance = 4000;
+    orbitControls3D.minPolarAngle = 0;
+    orbitControls3D.maxPolarAngle = Math.PI;
+    orbitControls3D.minAzimuthAngle = -Infinity;
+    orbitControls3D.maxAzimuthAngle = Infinity;
+    orbitControls3D.update();
+  }
+}
+
+function buildDecor3D(data, localStartX, localBaseY, decorH, oz, DEPTH, position, color) {
+  if (!data || !data.lines || !data.lines.length) return;
+  const scaleX = (v('W')) / data.bounds.width;
+  const scaleY = decorH / data.bounds.height;
+  const mapX = (svgX) => localStartX + (svgX - data.bounds.minX) * scaleX;
+  const mapY = (svgY) => {
+    const t = (svgY - data.bounds.minY) / data.bounds.height;
+    if (position === 'top') return localBaseY - decorH + t * decorH;
+    else return localBaseY + t * decorH;
+  };
+  const pts2D = [];
+  data.lines.forEach((l, i) => {
+    if (i === 0) pts2D.push(new THREE.Vector2(mapX(l.x1), mapY(l.y1)));
+    pts2D.push(new THREE.Vector2(mapX(l.x2), mapY(l.y2)));
+  });
+  const clean = [pts2D[0]];
+  for (let i = 1; i < pts2D.length; i++) {
+    const p = pts2D[i], pp = clean[clean.length-1];
+    if (Math.abs(p.x-pp.x) > 0.5 || Math.abs(p.y-pp.y) > 0.5) clean.push(p);
+  }
+  if (clean.length < 3) return;
+  const shape = new THREE.Shape(clean);
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: 16, bevelEnabled: false });
+  const mat = new THREE.MeshStandardMaterial({ color: color || hexToInt(s('mat_body')||'#c8974a'), roughness: v('mat_roughness')/100, side: THREE.DoubleSide });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(0, 0, oz - 16);
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  cabinetGroup.add(mesh);
+}
+
+function createCabinetBody(x,y,z,width,height,depth,thickness) {
+  [[width,thickness,depth,x-width/2,y+thickness/2,z+depth/2],
+   [width,thickness,depth,x-width/2,y+height-thickness/2,z+depth/2],
+   [width,height-2*thickness,thickness,x-width/2,y+height/2,z+depth-thickness/2],
+   [thickness,height-2*thickness,depth-thickness,x-thickness/2,y+height/2,z+depth/2],
+   [thickness,height-2*thickness,depth-thickness,x-width+thickness/2,y+height/2,z+depth/2]
+  ].forEach(([w,h,d,px,py,pz])=>{
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),MATERIALS.body);
+    m.position.set(px,py,pz); m.castShadow=true; m.receiveShadow=true; cabinetGroup.add(m);
+  });
+}
+
+function createPanelMesh(x,y,z,width,height,thickness,type,matOverride,bayIdx,bayCount) {
+  if (width<=0||height<=0) return;
+  const mat = matOverride || MATERIALS.panel;
+  const panel=new THREE.Mesh(new THREE.BoxGeometry(width,height,thickness),mat);
+  panel.position.set(x+width/2,y+height/2,z+thickness/2); panel.castShadow=true; panel.receiveShadow=true;
+  cabinetGroup.add(panel);
+  if (!matOverride || matOverride !== MATERIALS.ghost) {
+    const et=2;
+    [[width,et,thickness+2,x+width/2,y+height-et/2,z+thickness/2],[width,et,thickness+2,x+width/2,y+et/2,z+thickness/2],
+     [et,height,thickness+2,x+et/2,y+height/2,z+thickness/2],[et,height,thickness+2,x+width-et/2,y+height/2,z+thickness/2]
+    ].forEach(([w,h,d,px,py,pz])=>{
+      const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),MATERIALS.edge);
+      m.position.set(px,py,pz); cabinetGroup.add(m);
+    });
+  }
+  if ((type==='door'||type==='drawer') && matOverride !== MATERIALS.ghost) {
+    addPanelDetail3D(x, y, z, width, height, thickness, type);
+  }
+  if ((type==='door'||type==='drawer') && matOverride !== MATERIALS.ghost) {
+    if (!createPanelMesh._doorIdx) createPanelMesh._doorIdx=0;
+    createHandle3D(x,y,z,width,height,thickness,type,createPanelMesh._doorIdx,bayIdx||0,bayCount||1);
+    if (type==='door') createPanelMesh._doorIdx++;
+  }
+}
+
+function addPanelDetail3D(x, y, z, width, height, thickness, type) {
+  if (width <= 40 || height <= 40) return;
+  const engraveEl = document.getElementById('engrave_enabled');
+  if (engraveEl && !engraveEl.checked) return;
+  const panelFront = z;
+  const SURF = panelFront - 0.5;
+  const GROOVE_H = 3.0;
+  const frameColor  = hexToInt(s('mat_engrave_frame')  || '#2a1508');
+  const grooveColor = hexToInt(s('mat_engrave_groove') || '#150a04');
+  const carveMat  = new THREE.MeshStandardMaterial({color: frameColor,  roughness: 1.0, metalness: 0.0});
+  const grooveMat = new THREE.MeshStandardMaterial({color: grooveColor, roughness: 1.0, metalness: 0.0});
+  function addBox3D(w, h, d, px, py, pz, mat) {
+    if (w<=0||h<=0||d<=0) return;
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    m.position.set(px, py, pz);
+    cabinetGroup.add(m);
+  }
+  const addFrameRect = (fx, fy, fw, fh, sw) => {
+    if (fw <= 0 || fh <= 0 || sw <= 0) return;
+    // خط نازک مثل شیارها — ضخامت ثابت ۱.۸ واحد
+    const lw = 1.8;
+    // محاسبه موقعیت قاب: مرکز خط روی افست
+    const off = sw; // فاصله از لبه پنل
+    addBox3D(fw - 2*off, lw, GROOVE_H, fx+off + (fw-2*off)/2, fy+off,       SURF, carveMat); // بالا
+    addBox3D(fw - 2*off, lw, GROOVE_H, fx+off + (fw-2*off)/2, fy+fh-off,    SURF, carveMat); // پایین
+    addBox3D(lw, fh - 2*off, GROOVE_H, fx+off,       fy+off + (fh-2*off)/2, SURF, carveMat); // چپ
+    addBox3D(lw, fh - 2*off, GROOVE_H, fx+fw-off,    fy+off + (fh-2*off)/2, SURF, carveMat); // راست
+  };
+  const addGrooveGrid = (gx, gy, gw, gh, step, angle, mode) => {
+    if (step <= 0) return;
+    const lw = 1.8;
+    const RAD = angle * Math.PI / 180;
+    const nx = -Math.sin(RAD), ny = Math.cos(RAD);
+    const tx =  Math.cos(RAD), ty = Math.sin(RAD);
+    const projs = [
+      gx*nx+gy*ny, (gx+gw)*nx+gy*ny,
+      (gx+gw)*nx+(gy+gh)*ny, gx*nx+(gy+gh)*ny
+    ];
+    const lo = Math.min(...projs), hi = Math.max(...projs);
+    const num = Math.round((hi-lo)/step);
+    if (num < 1) return;
+    for (let i=1; i<num; i++) {
+      const d = lo + i*(hi-lo)/num;
+      const pts = [];
+      if (Math.abs(nx)>1e-9) {
+        const px1=(d-gy*ny)/nx; if(px1>=gx-1&&px1<=gx+gw+1) pts.push({x:px1,y:gy});
+        const px2=(d-(gy+gh)*ny)/nx; if(px2>=gx-1&&px2<=gx+gw+1) pts.push({x:px2,y:gy+gh});
+      }
+      if (Math.abs(ny)>1e-9) {
+        const py1=(d-gx*nx)/ny; if(py1>=gy-1&&py1<=gy+gh+1) pts.push({x:gx,y:py1});
+        const py2=(d-(gx+gw)*nx)/ny; if(py2>=gy-1&&py2<=gy+gh+1) pts.push({x:gx+gw,y:py2});
+      }
+      if (pts.length < 2) continue;
+      pts.sort((a,b)=>(a.x*tx+a.y*ty)-(b.x*tx+b.y*ty));
+      const p1=pts[0], p2=pts[pts.length-1];
+      const cx=(p1.x+p2.x)/2, cy=(p1.y+p2.y)/2;
+      const len=Math.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2);
+      if(len < 1) continue;
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(len, lw, GROOVE_H), grooveMat);
+      mesh.position.set(cx, cy, SURF);
+      mesh.rotation.z = -RAD;
+      cabinetGroup.add(mesh);
+    }
+    if (mode === 'Both') addGrooveGrid(gx, gy, gw, gh, step, angle+90, 'H');
+  };
+  const isDoor = (type === 'door');
+  const layers  = isDoor ? layersPro.door : layersPro.draw;
+  const rows    = isDoor ? v('Prows')  : v('DrRows');
+  const cols    = isDoor ? v('Pcols')  : v('DrCols');
+  // ── تغییر اصلی: حاشیه (margin) در 3D نشان داده نمی‌شود؛ فقط افست‌ها رندر می‌شوند ──
+  const gStep   = isDoor ? v('dS')  : v('DrS');
+  const gMode   = isDoor ? s('Dmode') : s('Drmode');
+  const cellGap = isDoor ? 20 : 15;
+  // بدون کسر حاشیه — سلول‌ها از لبه پنل شروع می‌شوند
+  const cw = (width  - (cols-1)*cellGap) / cols;
+  const ch = (height - (rows-1)*cellGap) / rows;
+  if (cw <= 10 || ch <= 10) return;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // بدون افزودن dm.left / dm.top
+      const fx = x + c*(cw + cellGap);
+      const fy = y + r*(ch + cellGap);
+      let tO = 0;
+      layers.forEach((layer, idx) => {
+        const prevTO = tO;
+        tO += (layer.v || 0);
+        if (layer.v > 0) addFrameRect(fx+prevTO, fy+prevTO, cw-2*prevTO, ch-2*prevTO, layer.v);
+        if (idx === layers.length - 1 && gStep > 0) {
+          const iw = cw - 2*tO, ih = ch - 2*tO;
+          const gAngle = isDoor ? v('dAngle') : v('DrAngle');
+          addGrooveGrid(fx+tO, fy+tO, iw, ih, gStep, gAngle, gMode);
+        }
+      });
+    }
+  }
+}
+
+// ── ساخت Shape گرد با شعاع چهار گوشه ──
+function makeRoundedShape(x, y, w, h, r) {
+  const shape = new THREE.Shape();
+  const tl = Math.min(r.tl||0, w/2, h/2);
+  const tr = Math.min(r.tr||0, w/2, h/2);
+  const bl = Math.min(r.bl||0, w/2, h/2);
+  const br = Math.min(r.br||0, w/2, h/2);
+  shape.moveTo(x + tl, y);
+  shape.lineTo(x + w - tr, y);
+  if (tr > 0) shape.quadraticCurveTo(x+w, y, x+w, y+tr);
+  shape.lineTo(x+w, y+h-br);
+  if (br > 0) shape.quadraticCurveTo(x+w, y+h, x+w-br, y+h);
+  shape.lineTo(x+bl, y+h);
+  if (bl > 0) shape.quadraticCurveTo(x, y+h, x, y+h-bl);
+  shape.lineTo(x, y+tl);
+  if (tl > 0) shape.quadraticCurveTo(x, y, x+tl, y);
+  return shape;
+}
+
+function createFrameDoor3D(x, y, z, width, height, thickness, bayIdx, bayCount) {
+  const FW = getFrameWidth(bayIdx);
+  const dr = getDoorRadius();
+  const mat = MATERIALS.panel;
+  const edgeMat = MATERIALS.edge;
+  const D = thickness;
+  const drIn = {
+    tl: Math.max(0, dr.tl - FW),
+    tr: Math.max(0, dr.tr - FW),
+    bl: Math.max(0, dr.bl - FW),
+    br: Math.max(0, dr.br - FW),
+  };
+  const outerShape = makeRoundedShape(x, y, width, height, {tl:0,tr:0,bl:0,br:0});
+  const innerX = x + FW, innerY = y + FW;
+  const innerW = width - 2*FW, innerH = height - 2*FW;
+  if (innerW > 10 && innerH > 10) {
+    const holePath = makeRoundedShape(innerX, innerY, innerW, innerH, dr);
+    outerShape.holes.push(holePath);
+  }
+  const geo = new THREE.ExtrudeGeometry(outerShape, { depth: D, bevelEnabled: false });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(0, 0, z);
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  cabinetGroup.add(mesh);
+  const edgeShape = makeRoundedShape(x, y, width, height, {tl:0,tr:0,bl:0,br:0});
+  if (innerW > 10 && innerH > 10) {
+    edgeShape.holes.push(makeRoundedShape(innerX, innerY, innerW, innerH, dr));
+  }
+  const edgeGeo = new THREE.ExtrudeGeometry(edgeShape, { depth: 2, bevelEnabled: false });
+  const edgeMesh = new THREE.Mesh(edgeGeo, edgeMat);
+  edgeMesh.position.set(0, 0, z - 1);
+  cabinetGroup.add(edgeMesh);
+  if (!createPanelMesh._doorIdx) createPanelMesh._doorIdx = 0;
+  createHandle3D(x, y, z, width, height, thickness, 'door', createPanelMesh._doorIdx, bayIdx, bayCount);
+  createPanelMesh._doorIdx++;
+}
+
+function createShelves3D(x,y,z,width,height,thickness,count,G,cabinetDepth) {
+  if (count<=0) return;
+  const shelfH=18, T=thickness;
+  const sw = width - 2*T, sd = (cabinetDepth||450) - 2*T;
+  const sx = x + T, sz = z + T;
+  const sectionH = height/(count+1);
+  for (let i=1;i<=count;i++) {
+    const sy = y + i*sectionH;
+    const shelf = new THREE.Mesh(new THREE.BoxGeometry(sw, shelfH, sd), MATERIALS.shelf||MATERIALS.body);
+    shelf.position.set(sx + sw/2, sy, sz + sd/2);
+    shelf.castShadow=true; shelf.receiveShadow=true; cabinetGroup.add(shelf);
+  }
+}
+
+function createHandle3D(x,y,z,width,height,thickness,type,doorIdx,bayIdx,bayCount) {
+  const hLen=Math.min(type==='drawer'?width*.38:height*.22,140);
+  const hT=8, hP=32;
+  const panelFront = z;
+  const hy = y+height/2;
+  const mat = MATERIALS.handle;
+  if (type==='drawer') {
+    const hx=x+width/2;
+    [[hx-hLen/2+hT/2],[hx+hLen/2-hT/2]].forEach(([px])=>{
+      const arm=new THREE.Mesh(new THREE.BoxGeometry(hT,hT,hP),mat);
+      arm.position.set(px, hy, panelFront - hP/2); arm.castShadow=true; cabinetGroup.add(arm);
+    });
+    const shaft=new THREE.Mesh(new THREE.BoxGeometry(hLen,hT,hT),mat);
+    shaft.position.set(hx, hy, panelFront - hP + hT/2); shaft.castShadow=true; cabinetGroup.add(shaft);
+  } else {
+    const margin = 55;
+    const isInnerLeft = (bayIdx*2 < bayCount);
+    const hx = isInnerLeft ? x+margin : x+width-margin;
+    [[hy+hLen/2-hT/2],[hy-hLen/2+hT/2]].forEach(([py])=>{
+      const arm=new THREE.Mesh(new THREE.BoxGeometry(hT,hT,hP),mat);
+      arm.position.set(hx, py, panelFront - hP/2); arm.castShadow=true; cabinetGroup.add(arm);
+    });
+    const shaft=new THREE.Mesh(new THREE.BoxGeometry(hT,hLen,hT),mat);
+    shaft.position.set(hx, hy, panelFront - hP + hT/2); shaft.castShadow=true; cabinetGroup.add(shaft);
+  }
+}
+</script>
+<script>
+// ══════════════════════════════════════════
+//  مدیریت دهنه‌ها
+// ══════════════════════════════════════════
+let bayTypes = [];
+
+function syncDcountFromInput() {
+  const newCount = Math.max(1, Math.min(10, v('Dcount')));
+  while (bayTypes.length < newCount) bayTypes.push('door');
+  bayTypes.length = newCount;
+  Object.keys(slotShelves).forEach(k=>{ if (+k>=newCount) delete slotShelves[k]; });
+  updateHybridConfig(); draw();
+}
+
+function addBay() {
+  if (bayTypes.length>=10) { alert('حداکثر ۱۰ دهنه مجاز است'); return; }
+  bayTypes.push('door');
+  document.getElementById('Dcount').value = bayTypes.length;
+  updateHybridConfig(); draw();
+}
+
+function deleteBay(index) {
+  if (bayTypes.length<=1) { alert('حداقل یک دهنه باید وجود داشته باشد'); return; }
+  bayTypes.splice(index,1);
+  const newShelves={}, newOpen={}, newFrame={};
+  Object.keys(slotShelves).forEach(k=>{ const ki=+k; if(ki<index) newShelves[ki]=slotShelves[k]; else if(ki>index) newShelves[ki-1]=slotShelves[k]; });
+  Object.keys(bayOpen).forEach(k=>{ const ki=+k; if(ki<index) newOpen[ki]=bayOpen[k]; else if(ki>index) newOpen[ki-1]=bayOpen[k]; });
+  Object.keys(bayFrameLayer).forEach(k=>{ const ki=+k; if(ki<index) newFrame[ki]=bayFrameLayer[k]; else if(ki>index) newFrame[ki-1]=bayFrameLayer[k]; });
+  slotShelves=newShelves; bayOpen=newOpen; bayFrameLayer=newFrame;
+  document.getElementById('Dcount').value=bayTypes.length;
+  updateHybridConfig(); draw();
+}
+
+function toggleBayOpen(i) { bayOpen[i] = !bayOpen[i]; updateHybridConfig(); draw(); }
+
+function updateHybridConfig() {
+  const count = bayTypes.length; if (!count) return;
+  const container = document.getElementById('hybridContainer'); container.innerHTML = '';
+  let hasSlotDrawer = false;
+  for (let i=0;i<count;i++) {
+    const type = bayTypes[i] || 'door';
+    if (type==='door_drawer') hasSlotDrawer=true;
+    const shCount = slotShelves[i]||0, isOpen = bayOpen[i]||false;
+    const isDoor = type==='door'||type==='door_drawer'||type==='frame';
+    const div = document.createElement('div'); div.className='hybrid-row';
+    div.style.borderColor = isOpen ? '#fcd34d' : '#e2e8f0';
+    div.style.background = isOpen ? '#fffbeb' : '#f8fafc';
+    div.innerHTML=`
+      <div class="hybrid-row-header">
+        <span style="font-size:11px;font-weight:700;color:#64748b;min-width:52px;">دهنه ${i+1}:</span>
+        <select class="hybrid-select" id="slot_${i}" onchange="bayTypes[${i}]=this.value;updateHybridConfig();draw();">
+          <option value="door" ${type==='door'?'selected':''}>🚪 درب</option>
+          <option value="frame" ${type==='frame'?'selected':''}>🖼 کلاف (قاب)</option>
+          <option value="door_drawer" ${type==='door_drawer'?'selected':''}>🚪📦 درب+کشو</option>
+          <option value="dr_2" ${type==='dr_2'?'selected':''}>📦 ۲ کشو</option>
+          <option value="dr_3" ${type==='dr_3'?'selected':''}>📦 ۳ کشو</option>
+          <option value="dr_4" ${type==='dr_4'?'selected':''}>📦 ۴ کشو</option>
+        </select>
+        ${isDoor?`<button onclick="toggleBayOpen(${i})" title="${isOpen?'بستن':'باز'} دهنه" style="padding:3px 8px;font-size:13px;background:${isOpen?'#fef3c7':'#f0f9ff'};color:${isOpen?'#d97706':'#0284c7'};border:1px solid ${isOpen?'#fcd34d':'#bae6fd'};border-radius:6px;cursor:pointer;font-weight:700;">${isOpen?'🟡':'🔵'}</button>`:''}
+        <button class="bay-delete-btn" onclick="deleteBay(${i})">🗑</button>
+      </div>
+      ${type==='frame'?`<div style="display:flex;align-items:center;gap:6px;background:#faf5ff;border-radius:6px;padding:5px 8px;margin-bottom:4px;"><span style="font-size:11px;font-weight:700;color:#7c3aed;">🖼 خالی از افست:</span><select style="font-size:11px;padding:2px 5px;border:1px solid #ddd6fe;border-radius:5px;background:#fff;" onchange="bayFrameLayer[${i}]=+this.value;draw();">${layersPro.door.map((l,li)=>{ const cumul=layersPro.door.slice(0,li+1).reduce((s,x)=>s+(x.v||0),0); const sel=(bayFrameLayer[i]??layersPro.door.length-1)===li?'selected':''; return `<option value="${li}" ${sel}>${l.n} (${cumul}mm)</option>`; }).join('')}</select></div>`:''}
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div class="shelf-control"><span>📚</span><input type="number" value="${shCount}" min="0" max="8" oninput="slotShelves[${i}]=+this.value;draw();" style="width:45px;padding:3px 5px;font-size:12px;border:1px solid #e2e8f0;border-radius:6px;"></div>
+        ${isOpen?'<span style="font-size:10px;color:#d97706;font-weight:600;">🟡 درب پنهان</span>':''}
+      </div>`;
+    container.appendChild(div);
+  }
+  const addDiv=document.createElement('div');
+  addDiv.innerHTML=`<button onclick="addBay()" style="width:100%;padding:6px;background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:7px;font-size:11px;cursor:pointer;font-weight:700;margin-top:2px;">+ افزودن دهنه جدید</button>`;
+  container.appendChild(addDiv);
+  const ss = document.getElementById('slotDrawerSettings');
+  if (ss) ss.style.display = hasSlotDrawer?'block':'none';
+}
+
+// ══════════════════════════════════════════
+//  رسم DXF
+// ══════════════════════════════════════════
+let dxfLines = [];
+function addLine(x1,y1,x2,y2,layer,dashed=false) { dxfLines.push({x1,y1,x2,y2,layer,dashed}); }
+
+function addRoundedRect(x,y,w,h,radius,layer) {
+  const pts=[];
+  const addArc=(cx,cy,r,sA,eA)=>{ if(r<=0.1){pts.push({x:cx,y:cy});return;} for(let a=sA;a<=eA;a+=2){const rad=a*Math.PI/180;pts.push({x:cx+Math.cos(rad)*r,y:cy+Math.sin(rad)*r});} };
+  const r={tl:Math.max(0,Math.min(radius.tl||0,w/2,h/2)),tr:Math.max(0,Math.min(radius.tr||0,w/2,h/2)),bl:Math.max(0,Math.min(radius.bl||0,w/2,h/2)),br:Math.max(0,Math.min(radius.br||0,w/2,h/2))};
+  addArc(x+w-r.tr,y+r.tr,r.tr,270,360);addArc(x+w-r.br,y+h-r.br,r.br,0,90);addArc(x+r.bl,y+h-r.bl,r.bl,90,180);addArc(x+r.tl,y+r.tl,r.tl,180,270);
+  for(let i=0;i<pts.length;i++){const p1=pts[i],p2=pts[(i+1)%pts.length];addLine(p1.x,p1.y,p2.x,p2.y,layer);}
+}
+
+function drawPerfectGrooves(x,y,w,h,radius,targetStep,angle,mode,layer) {
+  if(targetStep<=0) return;
+  const r = radius || {tl:0,tr:0,bl:0,br:0};
+  const pattern = s('GPattern');
+  const inside = (px,py) => {
+    if(px < x || px > x+w || py < y || py > y+h) return false;
+    if(px < x+r.tl && py < y+r.tl && (px-x-r.tl)**2+(py-y-r.tl)**2 > r.tl**2) return false;
+    if(px > x+w-r.tr && py < y+r.tr && (px-x-w+r.tr)**2+(py-y-r.tr)**2 > r.tr**2) return false;
+    if(px < x+r.bl && py > y+h-r.bl && (px-x-r.bl)**2+(py-y-h+r.bl)**2 > r.bl**2) return false;
+    if(px > x+w-r.br && py > y+h-r.br && (px-x-w+r.br)**2+(py-y-h+r.br)**2 > r.br**2) return false;
+    return true;
+  };
+  const drawDir = (ang) => {
+    const RAD = ang * Math.PI / 180;
+    const nx = -Math.sin(RAD);
+    const ny =  Math.cos(RAD);
+    const tx =  Math.cos(RAD);
+    const ty =  Math.sin(RAD);
+    const projs = [x*nx+y*ny,(x+w)*nx+y*ny,(x+w)*nx+(y+h)*ny,x*nx+(y+h)*ny];
+    const lo = Math.min(...projs);
+    const hi = Math.max(...projs);
+    const num = Math.round((hi - lo) / targetStep);
+    if(num < 1) return;
+    const lines = [];
+    for(let i = 1; i < num; i++) {
+      const d = lo + i * (hi - lo) / num;
+      const pts = [];
+      if(Math.abs(nx) > 1e-9) {
+        const px = (d - y*ny) / nx;
+        if(px >= x - 1 && px <= x+w + 1) pts.push({x:px, y:y});
+        const px2 = (d - (y+h)*ny) / nx;
+        if(px2 >= x - 1 && px2 <= x+w + 1) pts.push({x:px2, y:y+h});
+      }
+      if(Math.abs(ny) > 1e-9) {
+        const py1 = (d - x*nx) / ny;
+        if(py1 >= y - 1 && py1 <= y+h + 1) pts.push({x:x, y:py1});
+        const py2 = (d - (x+w)*nx) / ny;
+        if(py2 >= y - 1 && py2 <= y+h + 1) pts.push({x:x+w, y:py2});
+      }
+      if(pts.length < 2) continue;
+      pts.sort((a,b) => (a.x*tx + a.y*ty) - (b.x*tx + b.y*ty));
+      const p1 = pts[0], p2 = pts[pts.length-1];
+      const allPts = [p1, p2];
+      const arcX = (ccx,ccy,rc) => {
+        if(rc < 1) return;
+        const fx=p1.x-ccx, fy=p1.y-ccy;
+        const dx=p2.x-p1.x, dy=p2.y-p1.y;
+        const A=dx*dx+dy*dy, B=2*(fx*dx+fy*dy), C=fx*fx+fy*fy-rc*rc;
+        const det = B*B - 4*A*C;
+        if(det < 0) return;
+        const sq = Math.sqrt(det);
+        [(-B-sq)/(2*A), (-B+sq)/(2*A)].forEach(t => {
+          if(t > 0.001 && t < 0.999) allPts.push({x:p1.x+t*dx, y:p1.y+t*dy});
+        });
+      };
+      arcX(x+r.tl,y+r.tl,r.tl||0);arcX(x+w-r.tr,y+r.tr,r.tr||0);
+      arcX(x+r.bl,y+h-r.bl,r.bl||0);arcX(x+w-r.br,y+h-r.br,r.br||0);
+      allPts.sort((a,b) => (a.x*tx + a.y*ty) - (b.x*tx + b.y*ty));
+      for(let k = 0; k < allPts.length-1; k++) {
+        const mx = (allPts[k].x + allPts[k+1].x)/2;
+        const my = (allPts[k].y + allPts[k+1].y)/2;
+        if(inside(mx, my)) lines.push({p1:allPts[k], p2:allPts[k+1], i});
+      }
+    }
+    lines.sort((a,b) => a.i - b.i);
+    for(let k = 0; k < lines.length; k++) {
+      let {p1, p2} = lines[k];
+      if((pattern==='alt'||pattern==='zig') && k%2===1) { const tmp=p1; p1=p2; p2=tmp; }
+      addLine(p1.x, p1.y, p2.x, p2.y, layer);
+      if(pattern==='zig' && k < lines.length-1) {
+        const ns = lines[k+1];
+        const nstart = (k+1)%2===1 ? ns.p2 : ns.p1;
+        addLine(p2.x, p2.y, nstart.x, nstart.y, layer);
+      }
+    }
+  };
+  drawDir(angle);
+  if(mode === 'Both') drawDir(angle + 90);
+}
+
+function drawShelves2D(x,y,w,h,count,layer) {
+  if(count<=0)return;
+  const sectionH=h/(count+1);
+  for(let i=1;i<=count;i++){const sy=y+i*sectionH;addLine(x,sy,x+w,sy,layer);}
+}
+
+function drawHandle2D(x,y,w,h,type,doorIdx) {
+  const hLayer='HANDLE',capLen=Math.max(w,h)*0.025;
+  if(type==='drawer'){
+    const hLen=Math.min(w*.38,160),hx1=x+w/2-hLen/2,hx2=x+w/2+hLen/2,hy=y+h*.5,offset=Math.max(8,h*.06);
+    addLine(hx1,hy,hx2,hy,hLayer);addLine(hx1,hy-offset,hx1,hy,hLayer);addLine(hx2,hy-offset,hx2,hy,hLayer);
+    addLine(hx1-capLen,hy-offset,hx1+capLen,hy-offset,hLayer);addLine(hx2-capLen,hy-offset,hx2+capLen,hy-offset,hLayer);
+  }else{
+    const isRight=(doorIdx%2===0),hLen=Math.min(h*.22,160),hy1=y+h/2-hLen/2,hy2=y+h/2+hLen/2,margin=Math.max(25,w*.07);
+    const hx=isRight?x+w-margin:x+margin,offset=Math.max(8,w*.04)*(isRight?-1:1);
+    addLine(hx,hy1,hx,hy2,hLayer);addLine(hx,hy1,hx+offset,hy1,hLayer);addLine(hx,hy2,hx+offset,hy2,hLayer);
+    addLine(hx+offset,hy1-capLen,hx+offset,hy1+capLen,hLayer);addLine(hx+offset,hy2-capLen,hx+offset,hy2+capLen,hLayer);
+  }
+}
+
+function drawFrameDoor2D(x,y,w,h,bayIdx) {
+  const FW=getFrameWidth(bayIdx),layer=ln('main');
+  const dr=getDoorRadius();
+  addRoundedRect(x,y,w,h,{tl:0,tr:0,bl:0,br:0},layer);
+  const ix=x+FW,iy=y+FW,iw=w-2*FW,ih=h-2*FW;
+  if(iw>10&&ih>10){
+    addRoundedRect(ix,iy,iw,ih,dr,layer);
+    addLine(x,y,ix,iy,layer);
+    addLine(x+w,y,ix+iw,iy,layer);
+    addLine(x,y+h,ix,iy+ih,layer);
+    addLine(x+w,y+h,ix+iw,iy+ih,layer);
+  }
+}
+
+function drawDoorContent(x,y,w,h,doorIdx) {
+  addRoundedRect(x,y,w,h,{tl:0,tr:0,bl:0,br:0},ln('main'));
+  const rows=v('Prows'),cols=v('Pcols'),dm=getDoorMargin(),dr=getDoorRadius(),gap=20;
+  const cw=(w-dm.left-dm.right-(cols-1)*gap)/cols,ch=(h-dm.top-dm.bottom-(rows-1)*gap)/rows;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const fx=x+dm.left+c*(cw+gap),fy=y+dm.top+r*(ch+gap);
+    let tO=0;
+    layersPro.door.forEach((layer,idx)=>{ tO+=layer.v;const iW=cw-2*tO,iH=ch-2*tO; const er={tl:Math.max(0,dr.tl-tO),tr:Math.max(0,dr.tr-tO),bl:Math.max(0,dr.bl-tO),br:Math.max(0,dr.br-tO)}; if(iW>0&&iH>0){addRoundedRect(fx+tO,fy+tO,iW,iH,er,layer.n);if(idx===layersPro.door.length-1)drawPerfectGrooves(fx+tO,fy+tO,iW,iH,er,v('dS'),v('dAngle'),s('Dmode'),s('grooveName_door')||'GROOVES_DOOR');} });
+  }
+}
+
+function drawDrawerContent(x,y,w,h,cutLayer,drawerIdx) {
+  addRoundedRect(x,y,w,h,{tl:0,tr:0,bl:0,br:0},cutLayer||ln('main'));
+  const rows=v('DrRows'),cols=v('DrCols'),dm=getDrawerMargin(),dr=getDrawerRadius(),gap=15;
+  const cw=(w-dm.left-dm.right-(cols-1)*gap)/cols,ch=(h-dm.top-dm.bottom-(rows-1)*gap)/rows;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const fx=x+dm.left+c*(cw+gap),fy=y+dm.top+r*(ch+gap);
+    let tO=0;
+    layersPro.draw.forEach((layer,idx)=>{ tO+=layer.v;const iW=cw-2*tO,iH=ch-2*tO; const er={tl:Math.max(0,dr.tl-tO),tr:Math.max(0,dr.tr-tO),bl:Math.max(0,dr.bl-tO),br:Math.max(0,dr.br-tO)}; if(iW>0&&iH>0){addRoundedRect(fx+tO,fy+tO,iW,iH,er,layer.n);if(idx===layersPro.draw.length-1)drawPerfectGrooves(fx+tO,fy+tO,iW,iH,er,v('DrS'),v('DrAngle'),s('Drmode'),s('grooveName_draw')||'GROOVES_DRAW');} });
+  }
+}
+</script>
+<script>
+// ══════════════════════════════════════════
+//  تابع اصلی draw
+// ══════════════════════════════════════════
+function draw() {
+  dxfLines=[];_doorIdxCounter2D=0;
+  const W=v('W'),H=v('H'),G=v('G'),Cw=v('Cw');
+  const crownH=crownData?crownData.bounds.height:(v('crownThickness')||0);
+  const baseboardH=baseboardData?baseboardData.bounds.height:(v('baseboardThickness')||0);
+  const cabinetY=crownH,totalH=crownH+H+baseboardH;
+  document.getElementById('svgMain').setAttribute('viewBox',`0 0 ${W} ${totalH}`);
+  document.getElementById('dimensionInfo').innerHTML=`${W} × ${H} mm`;
+  if(crownData)addDecorativeElement(crownData,0,crownH,W,'top');
+  else if(crownH>0){addLine(0,0,W,0,ln('crown'));addLine(W,0,W,crownH,ln('crown'));addLine(W,crownH,0,crownH,ln('crown'));addLine(0,crownH,0,0,ln('crown'));}
+  if(v('hasCol')){const colR={tl:0,tr:0,bl:0,br:0};[0,W-Cw].forEach(cx=>{addRoundedRect(cx,cabinetY,Cw,H,colR,ln('main'));drawPerfectGrooves(cx+10,cabinetY+10,Cw-20,H-20,colR,v('Cstep'),v('Cang'),s('Cmode'),s('grooveName_col')||'GROOVES_COL');});}
+  const startX=v('hasCol')?Cw+G:0,freeW=W-(v('hasCol')?2*(Cw+G):0);
+  const count=bayTypes.length,dW=(freeW-(count-1)*G)/count;
+  const auto=v('autoDrawer'),drHEach=v('DrHEach'),drCount=v('DrCount');
+  let totalDrawerZone=0;
+  if(auto&&drHEach>0)totalDrawerZone=drHEach*drCount+(drCount-1)*G;
+  else if(v('DrH')>0)totalDrawerZone=v('DrH');
+  let hasSlotDrawer=false,slotDrawerSlots=[];
+  for(let d=0;d<count;d++){if((bayTypes[d]||'door')==='door_drawer'){hasSlotDrawer=true;slotDrawerSlots.push(d);}}
+  const slotMode=document.querySelector('input[name="slotDrawerMode"]:checked')?.value||'continuous';
+  let slotH=(slotMode==='continuous'&&hasSlotDrawer)?(v('SlotDrawerH')||150):0;
+  const doorAreaH=totalDrawerZone>0?H-totalDrawerZone-G-slotH-(slotH>0?G:0):H-slotH-(slotH>0?G:0);
+  for(let d=0;d<count;d++){
+    const dx=startX+d*(dW+G),slotType=bayTypes[d]||'door';
+    const shCount=slotShelves[d]||0,isOpen=bayOpen[d]||false;
+    if(slotType==='door'||slotType==='frame'){
+      const fullH=doorAreaH+(slotMode==='continuous'?slotH+G:0);
+      const bx=dx,by=cabinetY+G,bw=dW,bh=fullH-2*G;
+      if(isOpen){const pts=[{x:bx,y:by},{x:bx+bw,y:by},{x:bx+bw,y:by+bh},{x:bx,y:by+bh}];for(let k=0;k<4;k++){addLine(pts[k].x,pts[k].y,pts[(k+1)%4].x,pts[(k+1)%4].y,'OPEN_BAY',true);}drawShelves2D(bx,by,bw,bh,shCount,ln('shelf'));}
+      else{if(slotType==='frame')drawFrameDoor2D(bx,by,bw,bh,d);else drawDoorContent(bx,by,bw,bh,_doorIdxCounter2D);drawShelves2D(bx,by,bw,bh,shCount,ln('shelf'));_doorIdxCounter2D++;}
+    }else if(slotType==='door_drawer'){
+      if(slotMode==='separate'){
+        const slotHl=v('SlotDrawerH')||150,slotCnt=v('SlotDrawerCount')||2,doorH=doorAreaH-2*G;
+        const bx=dx,by=cabinetY+G,bw=dW;
+        if(isOpen){const pts=[{x:bx,y:by},{x:bx+bw,y:by},{x:bx+bw,y:by+doorH},{x:bx,y:by+doorH}];for(let k=0;k<4;k++){addLine(pts[k].x,pts[k].y,pts[(k+1)%4].x,pts[(k+1)%4].y,'OPEN_BAY',true);}drawShelves2D(bx,by,bw,doorH,shCount,ln('shelf'));}
+        else{drawDoorContent(bx,by,bw,doorH,_doorIdxCounter2D);drawShelves2D(bx,by,bw,doorH,shCount,ln('shelf'));_doorIdxCounter2D++;}
+        const dsy=cabinetY+G+doorH+G,eH=(slotHl-(slotCnt-1)*G)/slotCnt;
+        for(let k=0;k<slotCnt;k++)drawDrawerContent(dx,dsy+k*(eH+G),dW,eH,ln('slotCut'),k);
+      }else{
+        const doorH=doorAreaH-2*G,bx=dx,by=cabinetY+G,bw=dW;
+        if(isOpen){const pts=[{x:bx,y:by},{x:bx+bw,y:by},{x:bx+bw,y:by+doorH},{x:bx,y:by+doorH}];for(let k=0;k<4;k++){addLine(pts[k].x,pts[k].y,pts[(k+1)%4].x,pts[(k+1)%4].y,'OPEN_BAY',true);}drawShelves2D(bx,by,bw,doorH,shCount,ln('shelf'));}
+        else{drawDoorContent(bx,by,bw,doorH,_doorIdxCounter2D);drawShelves2D(bx,by,bw,doorH,shCount,ln('shelf'));_doorIdxCounter2D++;}
+      }
+    }else{
+      const num=parseInt(slotType.split('_')[1]),segH=(doorAreaH-2*G-(num-1)*G)/num;
+      for(let k=0;k<num;k++)drawDrawerContent(dx,cabinetY+G+k*(segH+G),dW,segH,ln('bayCut'),k);
+    }
+  }
+  if(hasSlotDrawer&&slotMode==='continuous'&&slotH>0){
+    const cnt=v('SlotDrawerCount')||2,first=Math.min(...slotDrawerSlots),last=Math.max(...slotDrawerSlots);
+    const dx0=startX+first*(dW+G),dW0=(last-first+1)*dW+(last-first)*G;
+    const eH=(slotH-(cnt-1)*G)/cnt,sy=cabinetY+G+doorAreaH;
+    for(let k=0;k<cnt;k++)drawDrawerContent(dx0,sy+k*(eH+G),dW0,eH,ln('slotCut'),k);
+  }
+  if(v('DrH')>0||(auto&&drHEach>0)){
+    let dyZ=cabinetY+G+doorAreaH+(slotMode==='continuous'&&hasSlotDrawer?slotH+G:0),heights=[];
+    if(auto&&drHEach>0){for(let k=0;k<drCount;k++)heights.push(drHEach);}
+    else{const lastH=v('LastDrH'),total=v('DrH');if(lastH>0&&drCount>1){const std=(total-lastH-(drCount-1)*G)/(drCount-1);for(let k=0;k<drCount-1;k++)heights.push(std);heights.push(lastH);}else{const eq=(total-(drCount-1)*G)/drCount;for(let k=0;k<drCount;k++)heights.push(eq);}}
+    for(let k=0;k<drCount;k++){drawDrawerContent(startX,dyZ,freeW,heights[k],ln('main'),k);dyZ+=heights[k]+G;}
+  }
+  if(baseboardData)addDecorativeElement(baseboardData,0,cabinetY+H,W,'bottom');
+  else if(baseboardH>0){const by=cabinetY+H;addLine(0,by,W,by,ln('baseboard'));addLine(W,by,W,by+baseboardH,ln('baseboard'));addLine(W,by+baseboardH,0,by+baseboardH,ln('baseboard'));addLine(0,by+baseboardH,0,by,ln('baseboard'));}
+  const sw=Math.max(W,totalH)/800;
+  document.getElementById('svgMain').innerHTML=dxfLines.map(l=>{
+    let color='#3b82f6';
+    if(l.layer.includes('GROOVES')||l.layer.includes('SHAR'))color='#ef4444';
+    if(l.layer===ln('crown')||l.layer==='CROWN')color='#fbbf24';
+    if(l.layer===ln('baseboard')||l.layer==='BASEBOARD')color='#8b5cf6';
+    if(l.layer===ln('shelf')||l.layer==='SHELF')color='#10b981';
+    if(l.layer==='HANDLE')color='#f97316';
+    if(l.layer==='OPEN_BAY')color='#94a3b8';
+    const dash=l.dashed?`stroke-dasharray="${sw*6} ${sw*4}"`:''
+    const opacity=l.layer==='OPEN_BAY'?'opacity="0.55"':'';
+    return `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" stroke="${color}" stroke-width="${sw}" vector-effect="non-scaling-stroke" ${dash} ${opacity}/>`;
+  }).join('');
+  if(current3DView==='3d'&&scene)render3D();
+}
+
+// ══════════════════════════════════════════
+//  تزئینات (تاج/پاسنگ)
+// ══════════════════════════════════════════
+function parseSVG(svgText){const parser=new DOMParser();const doc=parser.parseFromString(svgText,'image/svg+xml');const lines=[];doc.querySelectorAll('line').forEach(l=>{lines.push({x1:parseFloat(l.getAttribute('x1')),y1:parseFloat(l.getAttribute('y1')),x2:parseFloat(l.getAttribute('x2')),y2:parseFloat(l.getAttribute('y2'))});});doc.querySelectorAll('path').forEach(p=>{const d=p.getAttribute('d');const commands=d.match(/[ML][^ML]*/g);let cx=0,cy=0;commands?.forEach(cmd=>{const t=cmd[0];const c=cmd.slice(1).trim().split(/[\s,]+/).map(parseFloat);if(t==='M'){cx=c[0];cy=c[1];}else if(t==='L'){lines.push({x1:cx,y1:cy,x2:c[0],y2:c[1]});cx=c[0];cy=c[1];}});});return lines;}
+function parseDXF(dxfText){const lines=[];const m=dxfText.matchAll(/\nLINE\n.*?\n10\n([\d.-]+)\n.*?20\n([\d.-]+)\n.*?11\n([\d.-]+)\n.*?21\n([\d.-]+)/gs);for(const x of m)lines.push({x1:parseFloat(x[1]),y1:parseFloat(x[2]),x2:parseFloat(x[3]),y2:parseFloat(x[4])});return lines;}
+function calculateBounds(lines){if(!lines.length)return null;let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;lines.forEach(l=>{minX=Math.min(minX,l.x1,l.x2);maxX=Math.max(maxX,l.x1,l.x2);minY=Math.min(minY,l.y1,l.y2);maxY=Math.max(maxY,l.y1,l.y2);});return{minX,maxX,minY,maxY,width:maxX-minX,height:maxY-minY};}
+function importCrown(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{let lines=file.name.endsWith('.svg')?parseSVG(e.target.result):parseDXF(e.target.result);if(!lines.length)throw new Error('هیچ خطی یافت نشد');const bounds=calculateBounds(lines);crownData={lines,bounds};document.getElementById('crownStatus').innerHTML=`✅ ${file.name}`;document.getElementById('crownStatus').classList.add('loaded');document.getElementById('clearCrownBtn').style.display='block';draw();}catch(err){alert('❌ '+err.message);}event.target.value='';};reader.readAsText(file);}
+function importBaseboard(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{let lines=file.name.endsWith('.svg')?parseSVG(e.target.result):parseDXF(e.target.result);if(!lines.length)throw new Error('هیچ خطی یافت نشد');const bounds=calculateBounds(lines);baseboardData={lines,bounds};document.getElementById('baseboardStatus').innerHTML=`✅ ${file.name}`;document.getElementById('baseboardStatus').classList.add('loaded');document.getElementById('clearBaseboardBtn').style.display='block';draw();}catch(err){alert('❌ '+err.message);}event.target.value='';};reader.readAsText(file);}
+function clearCrown(){crownData=null;document.getElementById('crownStatus').innerHTML='فایلی انتخاب نشده';document.getElementById('crownStatus').classList.remove('loaded');document.getElementById('clearCrownBtn').style.display='none';draw();}
+function clearBaseboard(){baseboardData=null;document.getElementById('baseboardStatus').innerHTML='فایلی انتخاب نشده';document.getElementById('baseboardStatus').classList.remove('loaded');document.getElementById('clearBaseboardBtn').style.display='none';draw();}
+function addDecorativeElement(data,targetX,targetY,targetWidth,position){
+  if(!data)return 0;const scaleX=targetWidth/data.bounds.width;const offsetY=position==='top'?(targetY-data.bounds.height):targetY;
+  data.lines.forEach(line=>{const x1=targetX+(line.x1-data.bounds.minX)*scaleX;const y1=offsetY+(line.y1-data.bounds.minY);const x2=targetX+(line.x2-data.bounds.minX)*scaleX;const y2=offsetY+(line.y2-data.bounds.minY);addLine(x1,y1,x2,y2,position==='top'?ln('crown'):ln('baseboard'));});return data.bounds.height;
+}
+</script>
+<script>
+// ══════════════════════════════════════════
+//  مدیریت مجموعه‌های پروژه
+// ══════════════════════════════════════════
+let projectSets = [];
+let currentSetIndex = 0;
+
+async function loadProjectSetsFromStorage() {
+  setSyncStatus('sync');
+  try {
+    const rows = await sbSelect('door_design_sets', 'order=created_at.asc');
+    if (rows.length) {
+      projectSets = rows.map(r => ({ id: r.id, name: r.name, projects: r.projects || new Array(20).fill(null) }));
+    } else {
+      projectSets = [{ id: Date.now().toString(), name: 'مجموعه ۱', projects: new Array(20).fill(null) }];
+      await sbUpsert('door_design_sets', { id: projectSets[0].id, name: projectSets[0].name, projects: projectSets[0].projects });
+    }
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('err', e.message);
+    projectSets = [{ id: Date.now().toString(), name: 'مجموعه ۱', projects: new Array(20).fill(null) }];
+  }
+  if (!projectSets.length) projectSets = [{ id: Date.now().toString(), name: 'مجموعه ۱', projects: new Array(20).fill(null) }];
+  currentSetIndex = Math.min(currentSetIndex, projectSets.length - 1);
+  projects = projectSets[currentSetIndex].projects;
+}
+
+async function saveProjectSetsToStorage() {
+  projectSets[currentSetIndex].projects = projects;
+  const set = projectSets[currentSetIndex];
+  setSyncStatus('sync');
+  try{
+    await sbUpsert('door_design_sets', { id: set.id, name: set.name, projects: set.projects });
+    setSyncStatus('ok');
+  }catch(e){ setSyncStatus('err', e.message); }
+}
+
+function renderSetSelector() {
+  const sel = document.getElementById('projectSetSelect');
+  sel.innerHTML = projectSets.map((s,i) =>
+    `<option value="${i}" ${i===currentSetIndex?'selected':''}>${s.name} (${s.projects.filter(p=>p).length}/20)</option>`
+  ).join('');
+}
+
+function switchProjectSet(idx) {
+  projectSets[currentSetIndex].projects = projects;
+  currentSetIndex = idx;
+  projects = projectSets[currentSetIndex].projects;
+  currentProjectIndex = -1;
+  saveProjectSetsToStorage();
+  renderSetSelector();
+  renderProjectSlots();
+  newProject();
+}
+
+function addProjectSet() {
+  const name = prompt('نام مجموعه جدید:', `مجموعه ${projectSets.length + 1}`);
+  if (!name) return;
+  projectSets.push({ id: Date.now().toString(), name, projects: new Array(20).fill(null) });
+  switchProjectSet(projectSets.length - 1);
+}
+
+function renameProjectSet() {
+  const name = prompt('نام جدید:', projectSets[currentSetIndex].name);
+  if (!name) return;
+  projectSets[currentSetIndex].name = name;
+  saveProjectSetsToStorage();
+  renderSetSelector();
+}
+
+async function deleteProjectSet() {
+  if (projectSets.length <= 1) { alert('❌ حداقل یک مجموعه باید وجود داشته باشد!'); return; }
+  if (!confirm(`⚠️ مجموعه «${projectSets[currentSetIndex].name}» و همه پروژه‌هایش حذف شود?`)) return;
+  const removedId = projectSets[currentSetIndex].id;
+  projectSets.splice(currentSetIndex, 1);
+  currentSetIndex = Math.max(0, currentSetIndex - 1);
+  projects = projectSets[currentSetIndex].projects;
+  currentProjectIndex = -1;
+  renderSetSelector();
+  renderProjectSlots();
+  newProject();
+  setSyncStatus('sync');
+  try{
+    await sbDelete('door_design_sets', removedId);
+    setSyncStatus('ok');
+  }catch(e){ setSyncStatus('err', e.message); }
+}
+
+function renderProjectSlots(){
+  const container=document.getElementById('projectSlots');container.innerHTML='';
+  for(let i=0;i<20;i++){
+    const p=projects[i];const div=document.createElement('div');
+    div.className='project-slot'+(i===currentProjectIndex?' active':'')+(!p?' empty':'');
+    if(p){const db=document.createElement('button');db.className='delete-btn';db.innerHTML='×';db.onclick=(e)=>{e.stopPropagation();deleteProject(i,e);};div.appendChild(db);div.innerHTML+=p.name.substring(0,6);}
+    else{div.innerHTML=`${i+1}`;}
+    div.onclick=()=>loadProject(i);container.appendChild(div);
+  }
+}
+
+function getCurrentProjectData(){
+  const data={name:document.getElementById('projectName').value||'پروژه بدون نام'};
+  document.querySelectorAll('.saveable').forEach(el=>{data[el.id]=el.type==='checkbox'?el.checked:el.value;});
+  data.layers=JSON.parse(JSON.stringify(layersPro));data.bayTypes=[...bayTypes];data.slotShelves={...slotShelves};data.bayOpen={...bayOpen};data.bayFrameLayer={...bayFrameLayer};
+  data.doorMarginMode=document.querySelector('input[name="doorMarginMode"]:checked').value;data.doorRadiusMode=document.querySelector('input[name="doorRadiusMode"]:checked').value;
+  data.drawerMarginMode=document.querySelector('input[name="drawerMarginMode"]:checked').value;data.drawerRadiusMode=document.querySelector('input[name="drawerRadiusMode"]:checked').value;
+  data.mat_body=s('mat_body');data.mat_panel=s('mat_panel');data.mat_edge=s('mat_edge');data.mat_handle=s('mat_handle');data.mat_shelf=s('mat_shelf');data.mat_bg=s('mat_bg');data.mat_roughness=v('mat_roughness');data.mat_metalness=v('mat_metalness');
+  return data;
+}
+
+function loadProjectData(data){
+  document.getElementById('projectName').value=data.name||'';
+  document.querySelectorAll('.saveable').forEach(el=>{if(data[el.id]!==undefined){el.type==='checkbox'?el.checked=data[el.id]:el.value=data[el.id];}});
+  if(data.layers)layersPro=JSON.parse(JSON.stringify(data.layers));
+  if(data.bayTypes){bayTypes=[...data.bayTypes];document.getElementById('Dcount').value=bayTypes.length;}
+  if(data.slotShelves)slotShelves={...data.slotShelves};
+  if(data.bayOpen)bayOpen={...data.bayOpen};else bayOpen={};
+  if(data.bayFrameLayer)bayFrameLayer={...data.bayFrameLayer};else bayFrameLayer={};
+  if(data.doorMarginMode){document.querySelector(`input[name="doorMarginMode"][value="${data.doorMarginMode}"]`).checked=true;toggleDoorMarginMode();}
+  if(data.doorRadiusMode){document.querySelector(`input[name="doorRadiusMode"][value="${data.doorRadiusMode}"]`).checked=true;toggleDoorRadiusMode();}
+  if(data.drawerMarginMode){document.querySelector(`input[name="drawerMarginMode"][value="${data.drawerMarginMode}"]`).checked=true;toggleDrawerMarginMode();}
+  if(data.drawerRadiusMode){document.querySelector(`input[name="drawerRadiusMode"][value="${data.drawerRadiusMode}"]`).checked=true;toggleDrawerRadiusMode();}
+  ['mat_body','mat_panel','mat_edge','mat_handle','mat_shelf','mat_bg'].forEach(k=>{if(data[k]){const el=document.getElementById(k);if(el)el.value=data[k];}});
+  if(data.mat_roughness)document.getElementById('mat_roughness').value=data.mat_roughness;
+  if(data.mat_metalness)document.getElementById('mat_metalness').value=data.mat_metalness;
+  toggleAutoDrawer();updateMaterials();
+}
+
+function saveCurrentProject(){
+  if(currentProjectIndex===-1){let f=false;for(let i=0;i<20;i++){if(!projects[i]){currentProjectIndex=i;f=true;break;}}if(!f){alert('❌ ظرفیت پر است!');return;}}
+  projects[currentProjectIndex]=getCurrentProjectData();
+  saveProjectSetsToStorage();
+  renderProjectSlots();renderSetSelector();
+  alert('✅ پروژه ذخیره شد!');
+}
+
+function loadProject(index){
+  if(!projects[index]){currentProjectIndex=index;newProject();return;}
+  currentProjectIndex=index;loadProjectData(projects[index]);updateHybridConfig();renderLayers();draw();renderProjectSlots();
+}
+
+function newProject(){
+  document.getElementById('projectName').value='پروژه جدید';
+  const defaults={W:1600,H:2400,G:3,Cw:80,Cstep:20,Cang:90,Pmargin:50,PmarginV:50,PmarginH:50,PmarginTop:50,PmarginBottom:50,PmarginLeft:50,PmarginRight:50,Prows:2,Pcols:1,RDoor:40,RtDoor:40,RbDoor:40,RDoorTL:40,RDoorTR:40,RDoorBL:40,RDoorBR:40,dS:50,dAngle:0,DrCount:2,DrH:450,DrHEach:200,LastDrH:0,SlotDrawerH:150,SlotDrawerCount:2,DrMargin:20,DrMarginV:20,DrMarginH:20,DrMarginTop:20,DrMarginBottom:20,DrMarginLeft:20,DrMarginRight:20,DrRows:1,DrCols:2,RDraw:10,RtDraw:10,RbDraw:10,RDrawTL:10,RDrawTR:10,RDrawBL:10,RDrawBR:10,DrS:40,DrAngle:0,Cmode:'H',Dmode:'Both',Drmode:'H',GPattern:'std'};
+  for(let k in defaults){const el=document.getElementById(k);if(el)el.value=defaults[k];}
+  document.getElementById('hasCol').checked=true;document.getElementById('autoDrawer').checked=false;
+  document.getElementById('grooveName_col').value='GROOVES_COL';document.getElementById('grooveName_door').value='GROOVES_DOOR';document.getElementById('grooveName_draw').value='GROOVES_DRAW';
+  document.getElementById('layerName_main').value='cut6mm';document.getElementById('layerName_slotCut').value='SLOT_DRAWER_cut';document.getElementById('layerName_crown').value='CROWN';document.getElementById('layerName_baseboard').value='BASEBOARD';document.getElementById('layerName_bayCut').value='DRAW_IN_cut';document.getElementById('layerName_shelf').value='SHELF';
+  document.querySelector('input[name="doorMarginMode"][value="unified"]').checked=true;toggleDoorMarginMode();
+  document.querySelector('input[name="doorRadiusMode"][value="unified"]').checked=true;toggleDoorRadiusMode();
+  document.querySelector('input[name="drawerMarginMode"][value="unified"]').checked=true;toggleDrawerMarginMode();
+  document.querySelector('input[name="drawerRadiusMode"][value="unified"]').checked=true;toggleDrawerRadiusMode();
+  bayTypes=['door','door','door'];slotShelves={};bayOpen={};bayFrameLayer={};
+  document.getElementById('Dcount').value=3;
+  layersPro={door:[{n:'OFF1',v:0},{n:'OFF2',v:15}],draw:[{n:'D_OFF1',v:10},{n:'D_OFF2',v:10}]};
+  resetMaterials();toggleAutoDrawer();updateHybridConfig();renderLayers();draw();renderProjectSlots();
+}
+
+function deleteProject(index,event){event.stopPropagation();if(confirm('⚠️ حذف شود?')){projects[index]=null;saveProjectSetsToStorage();if(currentProjectIndex===index){currentProjectIndex=-1;newProject();}renderProjectSlots();renderSetSelector();}}
+
+function duplicateProject(){
+  if(currentProjectIndex===-1)return;let ei=-1;for(let i=0;i<20;i++){if(!projects[i]){ei=i;break;}}if(ei===-1){alert('❌ ظرفیت پر است');return;}
+  const d=getCurrentProjectData();d.name+=' (کپی)';projects[ei]=d;saveProjectSetsToStorage();currentProjectIndex=ei;loadProjectData(d);updateHybridConfig();renderLayers();draw();renderProjectSlots();renderSetSelector();
+}
+
+function exportAllProjects(){
+  const data={version:'V65_MULTI_BACKUP',timestamp:new Date().toISOString(),projectSets,currentSetIndex,crownData,baseboardData};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download=`CNC_LAND_V65_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);alert('✅ پشتیبان دانلود شد!');
+}
+
+function importAllProjects(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();reader.onload=function(e){
+    try{const d=JSON.parse(e.target.result);
+    if(d.projectSets){
+      if(!confirm(`📦 بازیابی ${d.projectSets.length} مجموعه؟`)){event.target.value='';return;}
+      projectSets=d.projectSets;currentSetIndex=d.currentSetIndex||0;
+      projects=projectSets[currentSetIndex].projects;currentProjectIndex=-1;
+    } else if(d.projects){
+      if(!confirm(`📦 بازیابی ${d.projects.filter(p=>p).length} پروژه?`)){event.target.value='';return;}
+      projectSets[currentSetIndex].projects=d.projects;projects=d.projects;currentProjectIndex=d.currentProjectIndex||-1;
+    } else throw new Error('فرمت نامعتبر');
+    if(d.crownData){crownData=d.crownData;document.getElementById('crownStatus').innerHTML='✅ بازیابی شد';document.getElementById('crownStatus').classList.add('loaded');document.getElementById('clearCrownBtn').style.display='block';}
+    if(d.baseboardData){baseboardData=d.baseboardData;document.getElementById('baseboardStatus').innerHTML='✅ بازیابی شد';document.getElementById('baseboardStatus').classList.add('loaded');document.getElementById('clearBaseboardBtn').style.display='block';}
+    saveProjectSetsToStorage();renderSetSelector();renderProjectSlots();
+    if(currentProjectIndex>=0&&projects[currentProjectIndex])loadProject(currentProjectIndex);else newProject();
+    alert('✅ بازیابی موفق!');}catch(err){alert('❌ خطا: '+err.message);}event.target.value='';
+  };reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════
+//  لایه‌های آفست
+// ══════════════════════════════════════════
+function renderLayers(){
+  ['door','draw'].forEach(type=>{
+    document.getElementById(type+'LayersDiv').innerHTML=layersPro[type].map((l,i)=>`<div class="layer-item"><input type="text" value="${l.n}" oninput="layersPro['${type}'][${i}].n=this.value;draw();" placeholder="نام لایه"><input type="number" value="${l.v}" oninput="layersPro['${type}'][${i}].v=+this.value;draw();" placeholder="آفست"><button class="btn-del" onclick="removeLayer('${type}',${i})">×</button></div>`).join('');
+  });
+}
+function addLayer(type){layersPro[type].push({n:'LAYER',v:10});renderLayers();draw();}
+function removeLayer(type,i){layersPro[type].splice(i,1);renderLayers();draw();}
+
+let layerPresets=[];
+async function saveLayerPreset(){
+  const name=document.getElementById('newPresetName').value.trim();
+  if(!name){document.getElementById('newPresetName').focus();return;}
+  const ex=layerPresets.findIndex(p=>p.name===name);
+  const id = ex>=0 ? layerPresets[ex].id : Date.now().toString();
+  const preset={id,name,door:JSON.parse(JSON.stringify(layersPro.door)),draw:JSON.parse(JSON.stringify(layersPro.draw))};
+  if(ex>=0)layerPresets[ex]=preset;else layerPresets.push(preset);
+  renderLayerPresets();
+  document.getElementById('newPresetName').value='';
+  setSyncStatus('sync');
+  try{
+    await sbUpsert('door_layer_presets', {id, name, door:preset.door, draw:preset.draw});
+    setSyncStatus('ok');
+  }catch(e){ setSyncStatus('err', e.message); }
+}
+function applyLayerPreset(idx){const p=layerPresets[idx];if(!p)return;layersPro.door=JSON.parse(JSON.stringify(p.door));layersPro.draw=JSON.parse(JSON.stringify(p.draw));renderLayers();draw();}
+async function deleteLayerPreset(idx){
+  const p=layerPresets[idx]; if(!p) return;
+  layerPresets.splice(idx,1);
+  renderLayerPresets();
+  setSyncStatus('sync');
+  try{
+    await sbDelete('door_layer_presets', p.id);
+    setSyncStatus('ok');
+  }catch(e){ setSyncStatus('err', e.message); }
+}
+function renderLayerPresets(){
+  const c=document.getElementById('layerPresetsList');if(!c)return;
+  if(!layerPresets.length){c.innerHTML='<div style="font-size:10px;color:#94a3b8;text-align:center;padding:8px;">هنوز ست لایه‌ای ذخیره نشده</div>';return;}
+  c.innerHTML=layerPresets.map((p,i)=>`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;margin-bottom:2px;display:flex;align-items:center;gap:5px;"><span style="flex:1;font-size:11px;font-weight:700;color:#334155;">📋 ${p.name}</span><button onclick="applyLayerPreset(${i})" style="font-size:10px;padding:3px 7px;background:#6366f1;color:#fff;border:none;border-radius:4px;cursor:pointer;">اعمال</button><button onclick="deleteLayerPreset(${i})" style="font-size:10px;padding:3px 6px;background:#fee2e2;color:#ef4444;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;">×</button></div>`).join('');
+}
+
+function copySettingsToAll(){
+  if(currentProjectIndex===-1){alert('❌ ابتدا یک پروژه فعال انتخاب کنید');return;}
+  const d=getCurrentProjectData();const s_o={};
+  if(document.getElementById('copyMargins').checked)['doorMarginMode','Pmargin','PmarginV','PmarginH','PmarginTop','PmarginBottom','PmarginLeft','PmarginRight','drawerMarginMode','DrMargin','DrMarginV','DrMarginH','DrMarginTop','DrMarginBottom','DrMarginLeft','DrMarginRight'].forEach(k=>s_o[k]=d[k]);
+  if(document.getElementById('copyRadius').checked)['doorRadiusMode','RDoor','RtDoor','RbDoor','RDoorTL','RDoorTR','RDoorBL','RDoorBR','drawerRadiusMode','RDraw','RtDraw','RbDraw','RDrawTL','RDrawTR','RDrawBL','RDrawBR'].forEach(k=>s_o[k]=d[k]);
+  if(document.getElementById('copyLayers').checked)s_o.layers=JSON.parse(JSON.stringify(d.layers));
+  if(document.getElementById('copyGrooves').checked)['dS','dAngle','Dmode','DrS','DrAngle','Drmode','Cstep','Cang','Cmode'].forEach(k=>s_o[k]=d[k]);
+  if(document.getElementById('copyGrooveNames').checked)['grooveName_door','grooveName_draw','grooveName_col'].forEach(k=>s_o[k]=d[k]);
+  let cnt=0;projects.forEach((p,i)=>{if(p&&i!==currentProjectIndex){Object.assign(p,s_o);cnt++;}});
+  saveProjectSetsToStorage();alert(`✅ به ${cnt} پروژه کپی شد`);
+}
+
+// ══════════════════════════════════════════
+//  دانلود DXF
+// ══════════════════════════════════════════
+function downloadDXF(){
+  const name=(document.getElementById('projectName').value||'CNC_LAND_V65').replace(/\s+/g,'_');
+  const W=v('W'),crownH=crownData?crownData.bounds.height:(v('crownThickness')||0);
+  const baseboardH=baseboardData?baseboardData.bounds.height:(v('baseboardThickness')||0);
+  const totalH=crownH+v('H')+baseboardH;
+  const cx=W/2,cy=totalH/2;
+  const rotated=dxfLines.map(l=>({x1:cx-(l.x1-cx),y1:cy-(l.y1-cy),x2:cx-(l.x2-cx),y2:cy-(l.y2-cy),layer:l.layer}));
+  const out="0\nSECTION\n2\nENTITIES\n"+rotated.map(l=>`0\nLINE\n8\n${l.layer}\n10\n${l.x1.toFixed(3)}\n20\n${l.y1.toFixed(3)}\n11\n${l.x2.toFixed(3)}\n21\n${l.y2.toFixed(3)}\n`).join('')+"0\nENDSEC\n0\nEOF";
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out]));a.download=name+'.dxf';a.click();
+}
+
+// ══════════════════════════════════════════
+//  راه‌اندازی اولیه
+// ══════════════════════════════════════════
+document.addEventListener('input',e=>{
+  if(e.target.classList.contains('saveable')&&!['mat_body','mat_panel','mat_edge','mat_handle','mat_shelf','mat_bg','mat_roughness','mat_metalness'].includes(e.target.id))draw();
+});
+bayTypes=['door','door','door'];
+
+async function loadLayerPresetsFromStorage(){
+  try{
+    const rows = await sbSelect('door_layer_presets', 'order=created_at.asc');
+    layerPresets = rows.map(r => ({ id: r.id, name: r.name, door: r.door, draw: r.draw }));
+  }catch(e){ console.error('خطا در بارگذاری پریست‌های لایه:', e); layerPresets = []; }
+}
+
+async function loadLayerNamePresetsFromStorage(){
+  try{
+    const rows = await sbSelect('door_layer_name_presets', 'order=created_at.asc');
+    layerNamePresets = rows.map(r => ({ id: r.id, ...(r.data||{}), name: r.name }));
+  }catch(e){ console.error('خطا در بارگذاری پریست‌های نام لایه:', e); layerNamePresets = []; }
+}
+
+async function initApp(){
+  setSyncStatus('sync');
+  await Promise.all([
+    loadProjectSetsFromStorage(),
+    loadLayerPresetsFromStorage(),
+    loadLayerNamePresetsFromStorage()
+  ]);
+  setSyncStatus('ok');
+  renderSetSelector();renderProjectSlots();updateHybridConfig();renderLayers();renderLayerPresets();renderLayerNamePresets();
+  initBitLibrary();
+  setTimeout(draw,100);
+}
+initApp();
+</script>
+</body>
+</html>
